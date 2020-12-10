@@ -1,0 +1,8 @@
+{
+    "name": "tetrifact-tools-build",
+    "version": "0.0.1",
+    "license": "MIT",
+    "dependencies": {
+        "pkg": "4.4.9"
+    }
+}

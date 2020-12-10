@@ -1,0 +1,23 @@
+{
+    "name": "tetrifact-tools",
+    "version": "0.0.1",
+    "license": "MIT",
+    "description": "Command line tools for Tetrifact",
+    "bin": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "dependencies": {
+        "minimist": "1.2.5",
+        "jsonfile": "6.0.1",
+        "madscience-httputils": "https://github.com/shukriadams/node-httpUtils.git#0.0.4"
+    },
+    "pkg": {
+        "assets": [
+            "./package.json",
+            "./node_modules/madscience-httputils/**",
+            "./node_modules/jsonfile/**",
+            "./node_modules/minimist/**"
+        ]
+    }
+}

@@ -1,0 +1,6 @@
+- get latest
+- get latest with tags
+- set root path
+- all gets return local path on exit
+- set max space used
+- set max packages fetched

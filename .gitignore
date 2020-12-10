@@ -1,0 +1,8 @@
+vagrant/.vagrant
+build/linux64
+build/win64
+build/node_modules
+src/node_modules
+vagrant/ubuntu-bionic-18.04-cloudimg-console.log
+build/package-lock.json
+src/package-lock.json
