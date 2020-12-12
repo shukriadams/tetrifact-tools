@@ -20,13 +20,13 @@ const path = require('path'),
     }
     
     switch(func){
-        case 'get':{
-            const get = require('./lib/get')
-            await get()
+        case 'getArchive':{
+            const getArchive = require('./lib/getArchive')
+            await getArchive()
             break
         }
         default:{  
-            console.log(`Invalid function "${func}" - supported functions are [get]`)
+            console.log(`Invalid function "${func}" - supported functions are [getArchive]`)
             process.exit(1)
         }
     }
