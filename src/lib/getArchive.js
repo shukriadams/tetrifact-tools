@@ -7,11 +7,11 @@ const process = require('process'),
     httputils = require('madscience-httputils')
 
 module.exports = async function(){
-    const argv = minimist(process.argv.slice(2)),
+    let argv = minimist(process.argv.slice(2)),
         host = argv.host,
         maxPackages = argv.maxPackages || 2,
         store = argv.store,
-        package = argv.package
+        pkg = argv.package
 
     if (!host){
         console.error('ERROR : host not defined. Use --host arg')
@@ -29,7 +29,7 @@ module.exports = async function(){
         return process.exit(1)
     }
 
-    if (!package){
+    if (!pkg){
         console.error('ERROR : package not defined. Use --package arg')
         return process.exit(1)
     }
@@ -37,10 +37,13 @@ module.exports = async function(){
     if (!await fs.exists(store))
         await fs.ensureDir(store)
 
-    const remoteURL = urljoin(host, 'v1/archives/', package),
-        savePath = path.join(store, `~${package}` ),
-        extractPath = path.join(store, package),
-        extractedFlag = path.join(store, `.${package}`)
+    // path will not accept numbers, if package code happens to be an int
+    pkg = pkg.toString()
+
+    const remoteURL = urljoin(host, 'v1/archives/', pkg),
+        savePath = path.join(store, `~${pkg}` ),
+        extractPath = path.join(store, pkg),
+        extractedFlag = path.join(store, `.${pkg}`)
 
     // check if the package has already been downloaded, we don't use the unpack folder presence for this as the folder
     // can be created but still be in an error state. Use the post-unpack flag instead
