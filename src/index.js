@@ -25,8 +25,13 @@ const path = require('path'),
             await getArchive()
             break
         }
+        case 'getLatestArchiveWithTag':{
+            const getArchive = require('./lib/getLatestArchiveWithTag')
+            await getArchive()
+            break
+        }        
         default:{  
-            console.log(`Invalid function "${func}" - supported functions are [getArchive]`)
+            console.log(`Invalid function "${func}" - supported functions are [getArchive|getLatestArchiveWithTag]`)
             process.exit(1)
         }
     }
