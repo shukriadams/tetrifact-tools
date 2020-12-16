@@ -15,7 +15,8 @@ const path = require('path'),
     }
     
     if (!func){
-        console.error(`error - no function specified. use tetrifact-tools <function> [--optional args]`)
+        console.error(`error - no function specified. use tetrifact-tools <function> [optional args]`)
+        console.log(`Supported functions are [getArchive|getLatestArchiveWithTag]`)
         return process.exit(1)
     }
     

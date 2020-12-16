@@ -7,3 +7,5 @@ vagrant/ubuntu-bionic-18.04-cloudimg-console.log
 build/package-lock.json
 src/package-lock.json
 src/packs
+src/tmp
+src/.getLatestArchiveWithTag

@@ -23,7 +23,7 @@ module.exports = async function(){
 
     const tmphost = host.toLowerCase()
     if (!tmphost.startsWith('http://') && !tmphost.startsWith('https://')){
-        console.error('ERROR : host malformed, most start with http:// or https://')
+        console.error('ERROR : host malformed, must start with http:// or https://')
         return process.exit(1)
     }
 

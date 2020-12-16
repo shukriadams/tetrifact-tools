@@ -3,7 +3,9 @@ const process = require('process'),
     urljoin = require('urljoin'),
     downloadPackage = require('./downloadPackage'),
     purgePackages = require('./purgePackages'),
-    httputils = require('madscience-httputils')
+    httputils = require('madscience-httputils'),
+    fs = require('fs'),
+    fsUtils = require('madscience-fsutils')
 
 module.exports = async function(){
     let argv = minimist(process.argv.slice(2)),
@@ -11,6 +13,11 @@ module.exports = async function(){
         maxPackages = argv.maxPackages || 2,
         store = argv.store,
         tag = argv.tag
+
+    if (fs.existsSync('.getLatestArchiveWithTag')) 
+        fs.unlinkSync('.getLatestArchiveWithTag')
+    
+    if (await fsUtils.exists)
 
     if (!host){
         console.error('ERROR : host not defined. Use --host arg')
@@ -24,7 +31,7 @@ module.exports = async function(){
 
     const tmphost = host.toLowerCase()
     if (!tmphost.startsWith('http://') && !tmphost.startsWith('https://')){
-        console.error('ERROR : host malformed, most start with http:// or https://')
+        console.error('ERROR : host malformed, must start with http:// or https://')
         return process.exit(1)
     }
 
@@ -36,27 +43,37 @@ module.exports = async function(){
     // path will not accept numbers, if latest code happens to be an int
     tag = tag.toString()
 
-    const lookupUrl = urljoin(host, 'v1/packages/latest/', tag),
-        lookup = await httputils.downloadString(lookupUrl)
+    let lookupUrl = urljoin(host, 'v1/packages/latest/', tag),
+        taglookup 
+    
+    // 
+    try {
+        taglookup = await httputils.downloadString(lookupUrl)
+    } catch (ex){
+        if (ex.errno === 'EPROTO')
+            console.log(`Error looking up ${lookupUrl}, are you using http instead of https or vice versa?`)
+        else
+            console.log(ex)
 
-    if (lookup.statusCode === 404){
+        return process.exit(1)
+    }
+
+    if (taglookup.statusCode === 404){
         console.log(`No packages with tag ${tag} were found`)
         return process.exit(1)
     }
 
-    if (lookup.statusCode !== 200){
-        console.log(`Error doing tag request : ${lookup.body}`)
+    if (taglookup.statusCode !== 200){
+        console.log(`Error doing tag request : ${taglookup.body}`)
         return process.exit(1)
     }
 
-    const packageInfo = JSON.parse(lookup.body)
-    
+    const packageInfo = JSON.parse(taglookup.body),
+        extractPath = await downloadPackage(host, store, packageInfo.id)
 
-    const extractPath = await downloadPackage(host, store, packageInfo.id)
     await purgePackages(store, maxPackages)
+    fs.writeFileSync('.getLatestArchiveWithTag', extractPath)
 
-    
 
-    console.log(extractPath)
-    process.exit(0)
+    console.log(`Package ${packageInfo.id} available at path ${extractPath}`)
 }

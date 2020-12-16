@@ -14,7 +14,7 @@
         "unzip-stream": "0.3.1",
         "fs-extra": "9.0.1",
         "madscience-fsUtils": "https://github.com/shukriadams/node-fsUtils.git#0.0.8",
-        "madscience-httputils": "https://github.com/shukriadams/node-httpUtils.git#0.0.5"
+        "madscience-httputils": "https://github.com/shukriadams/node-httpUtils.git#0.0.6"
     },
     "pkg": {
         "assets": [

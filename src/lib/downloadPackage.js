@@ -17,18 +17,27 @@ module.exports = async(host, store, pkg)=>{
 
     // check if the package has already been downloaded, we don't use the unpack folder presence for this as the folder
     // can be created but still be in an error state. Use the post-unpack flag instead
-    if (await fs.exists(extractedFlag))
+    if (await fs.exists(extractedFlag)){
+        console.log(`Package already exists locally, skipping download.`)
         return extractPath
+    }
 
     // ensure package exists
-    const status = await httputils.getStatus(remoteURL)
-    
+    let status
+    try{
+        status = await httputils.getStatus(remoteURL)
+    } catch(ex){
+        console.log(ex)
+        return process.exit(1)
+    }
+
     if (status === 404){
         console.error(`ERROR : package ${remoteURL} does not exist`)
         return process.exit(1)
     }
 
     try {
+        console.log(`Downloading package from ${remoteURL}`)
         await httputils.downloadFile(remoteURL, savePath)
     } catch(ex){
         console.error(`ERROR : ${ex}`)
@@ -43,6 +52,7 @@ module.exports = async(host, store, pkg)=>{
 
     // unzip
     try {
+        console.log(`Uncompressing package`)
         await fsUtils.unzipToDirectory(savePath, extractPath)
     } catch (ex){
         console.error(`ERROR : failed to unzip to ${savePath} to ${extractPath}`)
