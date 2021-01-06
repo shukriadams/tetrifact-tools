@@ -16,25 +16,32 @@ const path = require('path'),
     
     if (!func){
         console.error(`error - no function specified. use tetrifact-tools <function> [optional args]`)
-        console.log(`Supported functions are [getArchive|getLatestArchiveWithTag]`)
+        console.log(`Supported functions are [getPackage|getLatestPackageWithTag]`)
         return process.exit(1)
     }
-    
-    switch(func){
-        case 'getArchive':{
-            const getArchive = require('./lib/getArchive')
-            await getArchive()
-            break
+
+    try {
+        switch(func){
+            
+            case 'getPackage':{
+                const getPackage = require('./lib/getPackage')
+                await getPackage()
+                break
+            }
+
+            case 'getLatestPackageWithTag':{
+                const getLatestPackageWithTag = require('./lib/getLatestPackageWithTag')
+                await getLatestPackageWithTag()
+                break
+            }
+
+            default:{  
+                console.log(`Invalid function "${func}" - supported functions are [getPackage|getLatestPackageWithTag]`)
+                process.exit(1)
+            }
         }
-        case 'getLatestArchiveWithTag':{
-            const getArchive = require('./lib/getLatestArchiveWithTag')
-            await getArchive()
-            break
-        }        
-        default:{  
-            console.log(`Invalid function "${func}" - supported functions are [getArchive|getLatestArchiveWithTag]`)
-            process.exit(1)
-        }
+    } catch (ex){
+        console.log(ex)
     }
     
  })()

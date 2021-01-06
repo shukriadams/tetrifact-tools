@@ -1,7 +1,7 @@
 version: "2"
 services:
   tetrifacttestmount:
-    image: shukriadams/tetrifact:1.0.5
+    image: shukriadams/tetrifact:1.0.6
     container_name: tetrifact-demo
     restart: unless-stopped
     environment:

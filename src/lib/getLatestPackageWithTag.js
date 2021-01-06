@@ -4,20 +4,16 @@ const process = require('process'),
     downloadPackage = require('./downloadPackage'),
     purgePackages = require('./purgePackages'),
     httputils = require('madscience-httputils'),
-    fs = require('fs'),
-    fsUtils = require('madscience-fsutils')
+    fs = require('fs-extra'),
+    path = require('path')
 
 module.exports = async function(){
     let argv = minimist(process.argv.slice(2)),
         host = argv.host,
         maxPackages = argv.maxPackages || 2,
         store = argv.store,
-        tag = argv.tag
-
-    if (fs.existsSync('.getLatestArchiveWithTag')) 
-        fs.unlinkSync('.getLatestArchiveWithTag')
-    
-    if (await fsUtils.exists)
+        tag = argv.tag,
+        packageMetaDataPath = argv.metadata
 
     if (!host){
         console.error('ERROR : host not defined. Use --host arg')
@@ -72,7 +68,12 @@ module.exports = async function(){
         extractPath = await downloadPackage(host, store, packageInfo.id)
 
     await purgePackages(store, maxPackages)
-    fs.writeFileSync('.getLatestArchiveWithTag', extractPath)
+
+    if (packageMetaDataPath) 
+        await fs.outputJson(packageMetaDataPath, { 
+            path : path.resolve(extractPath),
+            id : packageInfo.id
+        })
 
 
     console.log(`Package ${packageInfo.id} available at path ${extractPath}`)
