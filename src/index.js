@@ -16,7 +16,7 @@ const path = require('path'),
     
     if (!func){
         console.error(`error - no function specified. use tetrifact-tools <function> [optional args]`)
-        console.log(`Supported functions are [getPackage|getLatestPackageWithTag]`)
+        console.log(`Supported functions are [getPackage|getLatestPackageWithTag|uploadPackage]`)
         return process.exit(1)
     }
 
@@ -32,6 +32,12 @@ const path = require('path'),
             case 'getLatestPackageWithTag':{
                 const getLatestPackageWithTag = require('./lib/getLatestPackageWithTag')
                 await getLatestPackageWithTag()
+                break
+            }
+
+            case 'uploadPackage':{
+                const uploadPackage = require('./lib/uploadPackage')
+                await uploadPackage()
                 break
             }
 
