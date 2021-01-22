@@ -7,7 +7,7 @@ Cross-platform, command line utility for doing useful things with [Tetrifact](ht
 ### Get package
 
     tetrifact-tools 
-        getArchive 
+        getPackage
         --package foo 
         --host https://mytetrifact.example.com 
         --store c:/packages
@@ -17,7 +17,7 @@ Downloads and unpacks package `foo` from the given host to local folder `c:/pack
 ### Get latest package with tags
 
     tetrifact-tools 
-        getLatestArchiveWithTag 
+        getLatestPackageWithTag 
         --tag foo,bar 
         --host https://mytetrifact.example.com 
         --store c:/packages 
