@@ -1,15 +1,16 @@
 const process = require('process'), 
     minimist = require('minimist'),
     downloadPackage = require('./downloadPackage'),
+    settingsProvider = require('./settings'),
     purgePackages = require('./purgePackages')
    
 
 module.exports = async function(){
-    const argv = minimist(process.argv.slice(2)),
-        host = argv.host,
-        maxPackages = argv.maxPackages || 2,
-        store = argv.store,
-        pkg = argv.package
+    const args = settingsProvider.merge(minimist(process.argv.slice(2))),
+        host = args.host,
+        maxPackages = args.maxPackages || 2,
+        store = args.store,
+        pkg = args.package
 
     if (!host){
         console.error('ERROR : host not defined. Use --host arg')

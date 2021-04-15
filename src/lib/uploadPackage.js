@@ -82,10 +82,10 @@ const removePathRoot = (root, thePath)=>{
 }
 
 module.exports = async()=>{
-    const settings = settingsProvider.merge(minimist(process.argv.slice(2))),
-        host = settings.host,
-        sourcePath = settings.path,
-        package = settings.package
+    const args = settingsProvider.merge(minimist(process.argv.slice(2))),
+        host = args.host,
+        sourcePath = args.path,
+        package = args.package
         
     if (!host){
         console.error('ERROR : host not defined. Use --host arg or add to settings')
@@ -111,6 +111,7 @@ module.exports = async()=>{
         // to lowercase to match .net sorting 
         a = a.toLowerCase()
         b = b.toLowerCase()
+
         return a > b ? 1 :
             b > a ? -1 :
             0

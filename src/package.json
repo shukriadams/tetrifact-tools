@@ -6,7 +6,7 @@
     "bin": "index.js",
     "scripts": {
         "start": "node index.js",
-        "debug": "node --inspect-brk=0.0.0.0:49024 index upload --package test1 --path ./lib"
+        "debug": "node --inspect-brk=0.0.0.0:49024 index download --package test1"
     },
     "dependencies": {
         "minimist": "1.2.5",
