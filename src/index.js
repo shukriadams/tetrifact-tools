@@ -16,7 +16,7 @@ const path = require('path'),
     
     if (!func){
         console.error(`error - no function specified. use tetrifact-tools <function> [optional args]`)
-        console.log(`Supported functions are [getArchive|getLatestArchiveWithTag]`)
+        console.log(`Supported functions are [getPackage|getLatestPackageWithTag|uploadPackage]`)
         return process.exit(1)
     }
 
@@ -45,7 +45,8 @@ const path = require('path'),
                 if (func)
                     console.log(`"${func}" is not a supported function. `)
                 console.log(`Tetrifact tool - supported functions are [getPackage|getLatestPackageWithTags|getArchive|getLatestArchiveWithTag]`)
-                process.exit(1)
+
+                console.log(`Invalid function "${func}" - supported functions are [getPackage|getLatestPackageWithTag]`)
             }
         }
     } catch (ex){
