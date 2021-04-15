@@ -24,18 +24,18 @@ const path = require('path'),
     try {
         switch(func){
             
-            case 'getArchive':{
-                const getArchive = require('./lib/getArchive')
-                await getArchive()
+            case 'getPackage':{
+                const getPackage = require('./lib/getPackage')
+                await getPackage()
                 break
             }
-            case 'getLatestArchiveWithTag':{
-                const getArchive = require('./lib/getLatestArchiveWithTag')
-                await getArchive()
+            case 'getLatestPackageWithTag':{
+                const getPackage = require('./lib/getLatestPackageWithTag')
+                await getPackage()
                 break
             }        
 
-            case 'uploadPackage':{
+            case 'upload':{
                 const uploadPackage = require('./lib/uploadPackage')
                 await uploadPackage()
                 break
@@ -44,9 +44,7 @@ const path = require('path'),
             default:{  
                 if (func)
                     console.log(`"${func}" is not a supported function. `)
-                console.log(`Tetrifact tool - supported functions are [getPackage|getLatestPackageWithTags|getArchive|getLatestArchiveWithTag]`)
-
-                console.log(`Invalid function "${func}" - supported functions are [getPackage|getLatestPackageWithTag]`)
+                console.log(`Tetrifact tool - supported functions are [upload|getPackage|getLatestPackageWithTags|getArchive|getLatestArchiveWithTag]`)
             }
         }
     } catch (ex){

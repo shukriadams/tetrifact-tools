@@ -4,6 +4,7 @@ const process = require('process'),
     request = require('request'),
     fs = require('fs-extra'),
     fsUtils = require('madscience-fsUtils'),
+    settingsProvider = require('./settings'),
     path = require('path')
     
 const upload = async function (url, filePath){
@@ -81,32 +82,29 @@ const removePathRoot = (root, thePath)=>{
 }
 
 module.exports = async()=>{
-    const argv = minimist(process.argv.slice(2)),
-        host = argv.host,
-        sourcePath = argv.path,
-        package = argv.package
-
+    const settings = settingsProvider.merge(minimist(process.argv.slice(2))),
+        host = settings.host,
+        sourcePath = settings.path,
+        package = settings.package
+        
     if (!host){
-        console.error('ERROR : host not defined. Use --host arg')
+        console.error('ERROR : host not defined. Use --host arg or add to settings')
         return process.exit(1)
     }
 
     if (!package){
-        console.error('ERROR : package od not defined. Use --package arg')
+        console.error('ERROR : package not defined. Use --package arg')
         return process.exit(1)
     }
 
     if (!sourcePath){
-        console.error('ERROR : source path not defined. Use --path arg')
+        console.error('ERROR : source path not defined. Use --path arg or add to settings')
         return process.exit(1)
     }
 
-    const archivePath = path.join(process.cwd(), `~${new Date().getTime()}` ),
+    let archivePath = path.join(process.cwd(), `~${new Date().getTime()}` ),
         url = urljoin(host, 'v1/packages', package, '?isArchive=true')
-
-    
-
-    let packageHashes = '',
+        packageHashes = '',
         packageFileNames = await fsUtils.readFilesUnderDir(sourcePath)
 
     packageFileNames = packageFileNames.sort((a, b)=> {
@@ -134,9 +132,9 @@ module.exports = async()=>{
         }
 
         if (result.success.hash === packageHashes)
-            console.log(`Package ${result.success.id} upload succeeded`)
+            console.log(`SUCCESS - package ${result.success.id} uploaded`)
         else
-            console.error(`Upload failed - local hash ${packageHashes} does not match remote ${result.success.hash}`)
+            console.error(`ERROR - local hash ${packageHashes} does not match remote ${result.success.hash}`)
         
     } catch(ex){
         console.log(ex)
