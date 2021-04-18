@@ -4,11 +4,12 @@ const process = require('process'),
     downloadPackage = require('./downloadPackage'),
     purgePackages = require('./purgePackages'),
     httputils = require('madscience-httputils'),
+    settingsProvider = require('./settings'),
     fs = require('fs-extra'),
     path = require('path')
 
 module.exports = async function(){
-    let argv = minimist(process.argv.slice(2)),
+    let argv = settingsProvider.merge(minimist(process.argv.slice(2))),
         host = argv.host,
         maxPackages = argv.maxPackages || 2,
         store = argv.store,
@@ -16,12 +17,12 @@ module.exports = async function(){
         packageMetaDataPath = argv.metadata
 
     if (!host){
-        console.error('ERROR : host not defined. Use --host arg')
+        console.error('ERROR : host not defined. Use --host <host>')
         return process.exit(1)
     }
 
     if (!store){
-        console.error('ERROR : store not defined. Use --store arg')
+        console.error('ERROR : store not defined. Use --store <store>')
         return process.exit(1)
     }
 
@@ -32,14 +33,14 @@ module.exports = async function(){
     }
 
     if (!tag){
-        console.error('ERROR : tag not defined. Use --tag <TAG>')
+        console.error('ERROR : tag not defined. Use --tag <tag>')
         return process.exit(1)
     }
 
     // path will not accept numbers, if latest code happens to be an int
     tag = tag.toString()
 
-    let lookupUrl = urljoin(host, 'v1/packages/latest/', tag),
+    let lookupUrl = urljoin(host, 'v1/packages/latest/', encodeURIComponent(tag)),
         taglookup 
     
     // 
@@ -64,8 +65,13 @@ module.exports = async function(){
         return process.exit(1)
     }
 
-    const packageInfo = JSON.parse(taglookup.body),
-        extractPath = await downloadPackage(host, store, packageInfo.id)
+    const packageInfo = JSON.parse(taglookup.body)
+    if (!packageInfo.success){
+        console.log(`Error looking up package : ${packageInfo}`)
+        return process.exit(1)
+    }
+
+    const extractPath = await downloadPackage(host, store, packageInfo.success.package.id)
 
     await purgePackages(store, maxPackages)
 
@@ -75,6 +81,5 @@ module.exports = async function(){
             id : packageInfo.id
         })
 
-
-    console.log(`Package ${packageInfo.id} available at path ${extractPath}`)
+    console.log(`Package ${packageInfo.success.package.id} available at path ${extractPath}`)
 }
