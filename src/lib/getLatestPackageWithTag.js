@@ -71,6 +71,12 @@ module.exports = async function(){
         return process.exit(1)
     }
 
+    if (!packageInfo.success.package){
+        console.log(`Couldn't find packages matching tags : ${tag}`)
+        return process.exit(1)
+    }
+
+
     const extractPath = await downloadPackage(host, store, packageInfo.success.package.id)
 
     await purgePackages(store, maxPackages)
