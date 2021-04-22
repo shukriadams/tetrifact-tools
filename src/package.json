@@ -5,17 +5,19 @@
     "description": "Command line tools for Tetrifact",
     "bin": "index.js",
     "scripts": {
-        "start": "node index.js"
+        "start": "node index.js",
+        "debug": "node --inspect-brk=0.0.0.0:49024 index"
     },
     "dependencies": {
         "minimist": "1.2.5",
         "jsonfile": "6.0.1",
         "urljoin": "0.1.5",
         "unzip-stream": "0.3.1",
+        "js-yaml": "3.13.1",
         "fs-extra": "9.0.1",
-        "request" : "2.88.2",
+        "request": "2.88.2",
         "madscience-fsUtils": "https://github.com/shukriadams/node-fsUtils.git#0.0.8",
-        "madscience-httputils": "https://github.com/shukriadams/node-httpUtils.git#0.0.6"
+        "madscience-httputils": "https://github.com/shukriadams/node-httpUtils.git#0.0.7"
     },
     "pkg": {
         "assets": [

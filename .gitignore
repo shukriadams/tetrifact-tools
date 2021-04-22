@@ -9,3 +9,5 @@ src/package-lock.json
 src/packs
 src/tmp
 src/.getLatestArchiveWithTag
+src/.test.zip
+src/tetrifact.yml
