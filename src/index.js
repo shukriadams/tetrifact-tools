@@ -16,7 +16,7 @@ const path = require('path'),
     
     if (!func){
         console.error(`error - no function specified. use tetrifact-tools <function> [optional args]`)
-        console.log(`Supported functions are [upload|download|downloadLatestWithTag]`)
+        console.log(`Supported functions are [upload|download|downloadtagged]`)
         return process.exit(1)
     }
 
@@ -29,7 +29,7 @@ const path = require('path'),
                 await getPackage()
                 break
             }
-            case 'downloadlatestwithtag':{
+            case 'downloadtagged':{
                 const getPackage = require('./lib/getLatestPackageWithTag')
                 await getPackage()
                 break
@@ -44,7 +44,7 @@ const path = require('path'),
             default:{  
                 if (func)
                     console.log(`"${func}" is not a supported function. `)
-                console.log(`Tetrifact tool - supported functions are [upload|download|downloadLatestWithTag]`)
+                console.log(`Tetrifact tool - supported functions are [upload|download|downloadtagged]`)
             }
         }
     } catch (ex){

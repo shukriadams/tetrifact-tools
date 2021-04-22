@@ -6,7 +6,7 @@
     "bin": "index.js",
     "scripts": {
         "start": "node index.js",
-        "debug": "node --inspect-brk=0.0.0.0:49024 index downloadlatestwithtag --tag data:test"
+        "debug": "node --inspect-brk=0.0.0.0:49024 index"
     },
     "dependencies": {
         "minimist": "1.2.5",
