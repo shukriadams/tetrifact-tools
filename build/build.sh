@@ -9,7 +9,7 @@
 # fail on errors
 set -e 
 
-# capture all arguments passed in, these is anything starting with --  
+# capture all arguments passed in, that is anything starting with --  
 while [ $# -gt 0 ]; do
     if [[ $1 == *"--"* ]]; then
         param="${1/--/}"
@@ -64,7 +64,7 @@ if [ ! "$upload" = 1 ]; then
     exit 0
 fi
 
-# ensure required arguments
+# ensure required arguments were passed in
 if [ -z "$repo" ]; then
     echo "--repo : github repo (user/repo) is required";
     exit 1;
