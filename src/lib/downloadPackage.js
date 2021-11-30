@@ -4,7 +4,7 @@ const urljoin = require('urljoin'),
     fsUtils = require('madscience-fsUtils'),
     httputils = require('madscience-httputils')
 
-module.exports = async(host, store, pkg)=>{
+module.exports = async(host, store, pkg, force = false)=>{
 
     // ensure package is string, url join fail on ints
     const remoteURL = urljoin(host, 'v1/archives/', pkg.toString()),
@@ -18,8 +18,12 @@ module.exports = async(host, store, pkg)=>{
     // check if the package has already been downloaded, we don't use the unpack folder presence for this as the folder
     // can be created but still be in an error state. Use the post-unpack flag instead
     if (await fs.exists(extractedFlag)){
-        console.log(`Package already exists locally, skipping download.`)
-        return extractPath
+        if (force){
+            console.log(`Package already exists locally, proceeding with forced download.`)
+        } else {
+            console.log(`Package already exists locally, skipping download.`)
+            return extractPath
+        }
     }
 
     // ensure package exists
@@ -37,7 +41,7 @@ module.exports = async(host, store, pkg)=>{
     }
 
     try {
-        console.log(`Downloading package from ${remoteURL}`)
+        console.log(`Downloading from ${remoteURL}`)
         await httputils.downloadFile(remoteURL, savePath)
     } catch(ex){
         console.error(`ERROR : ${ex}`)

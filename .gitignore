@@ -10,7 +10,8 @@ src/packs
 src/tmp
 src/.getLatestArchiveWithTag
 src/.test.zip
-src/tetrifact.yml
+src/.tetrifact.yml
 src/version.json
 vagrant/hyperv/.vagrant
 vagrant/virtualbox/.vagrant
+dev/data

@@ -11,8 +11,8 @@ const process = require('process'),
 module.exports = async function(){
     let argv = settingsProvider.merge(minimist(process.argv.slice(2))),
         host = argv.host,
-        maxPackages = argv.maxPackages || 2,
         store = argv.store,
+        force = args.force || args.f,
         tag = argv.tag,
         packageMetaDataPath = argv.metadata
 
@@ -77,9 +77,9 @@ module.exports = async function(){
     }
 
 
-    const extractPath = await downloadPackage(host, store, packageInfo.success.package.id)
+    const extractPath = await downloadPackage(host, store, packageInfo.success.package.id, force)
 
-    await purgePackages(store, maxPackages)
+    await purgePackages(store)
 
     if (packageMetaDataPath) 
         await fs.outputJson(packageMetaDataPath, { 

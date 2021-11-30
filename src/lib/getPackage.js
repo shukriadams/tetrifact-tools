@@ -7,8 +7,8 @@ const process = require('process'),
 module.exports = async function(){
     const args = settingsProvider.merge(minimist(process.argv.slice(2))),
         host = args.host,
-        maxPackages = args.maxPackages || 2,
         store = args.store,
+        force = args.force || args.f,
         pkg = args.package
 
     if (!host){
@@ -33,8 +33,8 @@ module.exports = async function(){
         return process.exit(1)
     }
 
-    const extractPath = await downloadPackage(host, store, pkg.toString())
-    await purgePackages(store, maxPackages)
+    const extractPath = await downloadPackage(host, store, pkg.toString(), force)
+    await purgePackages(store)
 
     console.log(`Package ${pkg} available at path ${extractPath}`)
 }

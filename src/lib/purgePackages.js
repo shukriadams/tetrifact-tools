@@ -1,9 +1,15 @@
 const fsUtils = require('madscience-fsUtils'),
+    path = require('path'),
+    settingsProvider = require('./settings'),
+    settings = settingsProvider.get(),
     fs = require('fs-extra')
 
-module.exports = async(store, maxPackages)=>{
-     // remove older packages that exceed quota
-     let downloadedPackagesFlags = await fsUtils.readFilesInDir(store, false),
+module.exports = async(store)=>{
+    if (!settings.purge)
+        return
+
+    // remove older packages that exceed quota
+    let downloadedPackagesFlags = await fsUtils.readFilesInDir(store, false),
         downloadedPackages = []
 
     for (const packageFlag of downloadedPackagesFlags){
@@ -27,10 +33,11 @@ module.exports = async(store, maxPackages)=>{
             0
     })
 
-    if (downloadedPackages.length > maxPackages){
-        downloadedPackages = downloadedPackages.map(r => r.package).slice(0, downloadedPackages.length - maxPackages)
+    if (downloadedPackages.length > settings.keep){
+        downloadedPackages = downloadedPackages.map(r => r.package).slice(0, downloadedPackages.length - settings.keep)
         for (const downloadedPackage of downloadedPackages){
             await fs.remove(path.join(store, downloadedPackage))
+            console.log(`automatically removed package ${path.join(store, downloadedPackage)}`)
             await fs.remove(path.join(store, downloadedPackage.substr(1)))
         }
     }

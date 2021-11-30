@@ -6,15 +6,21 @@ let fs = require('fs-extra'),
         host: null,
 
         // local path to store packages in - store holds multiple packages, divided by package id
-        store : null
+        store : null,
+
+        // if true, older downloaded packages will be perged to make place for new ones
+        purge : false,
+
+        // number of packages to keep if purge is enabled
+        keep: 2
     }
 
  // Load settings from YML file, merge with default settings
-if (fs.existsSync('./tetrifact.yml')){
+if (fs.existsSync('./.tetrifact.yml')){
     let userSettings = null
 
     try {
-        const settingsYML = fs.readFileSync('./tetrifact.yml', 'utf8')
+        const settingsYML = fs.readFileSync('./.tetrifact.yml', 'utf8')
         userSettings = yaml.safeLoad(settingsYML)
     } catch (e) {
         console.error('Error reading settings.yml', e)
@@ -25,12 +31,42 @@ if (fs.existsSync('./tetrifact.yml')){
 
 // apply all ENV VARS over settings, this means that ENV VARs win over all other settings
 for (const property in settings)
-    settings[property] = process.env[property] || settings[property]
+    settings[property] = process.env[`TETRIFACT_TOOLS-${property}`] || settings[property]
+
+// ensure bool
+try {
+    settings.purge = settings.purge === true || settings.purge.toLowerCase() === 'true' || settings.purge === 1 ? true : false
+} catch{
+    // ignore user-forced error
+    settings.purge = false
+}
+
+// ensure int
+try {
+    settings.keep = parseInt(settings.keep.toString())
+} catch{
+    // ignore user-forced error
+    settings.keep = 2
+}
+
+// ensure keep at least 1 or the package currently downloaded will be purged
+if (settings.keep < 1){
+    console.log(`Keep was set to ${settings.keep} but a minimum of 1 is permitted`)
+    settings.keep = 1
+}
 
 module.exports = {
     get (){
         return settings
     },
+
+    /**
+     * add incoming args to settings, this overrides built-in args, as well as args in .terifact.yml
+     */
+    mergeArgs(args){
+        settings = Object.assign(settings, args)
+    },
+
     merge(incoming){
         return Object.assign(settings, incoming)
     }

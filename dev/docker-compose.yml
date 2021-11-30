@@ -8,3 +8,6 @@ services:
       ASPNETCORE_URLS : http://*:5000
     ports:
     - "49023:5000"
+    volumes:
+        - ./data:/var/tetrifact/data/:rw    
+    
