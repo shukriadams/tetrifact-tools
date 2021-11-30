@@ -18,6 +18,18 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+# get tag on this revision
+tag=$(git describe --abbrev=0 --tags)
+
+# ensure current revision is tagged
+if [ -z "$tag" ]; then
+    echo "ERROR : current revision has no tag on it, cannot upload";
+    exit 1;
+fi
+
+# write version file
+echo "{ \"version\" : \"$tag\" }" > ./../src/version.json
+
 if [ "$target" = "" ]; then
     echo "ERROR : --target not set"
     exit 1;
@@ -75,20 +87,7 @@ if [ -z "$token" ]; then
     exit 1;
 fi
 
-# force get tags, these don't always seem to be pulled by jenkins
-git fetch --all --tags
 
-# get current revision the checkout is on
-currentRevision=$(git rev-parse --verify HEAD) 
-
-# get tag on this revision
-tag=$(git describe --contains $currentRevision)
-
-# ensure current revision is tagged
-if [ -z "$tag" ]; then
-    echo "ERROR : current revision has no tag on it, cannot upload";
-    exit 1;
-fi
 
 GH_REPO="https://api.github.com/repos/$repo"
 GH_TAGS="$GH_REPO/releases/tags/$tag"

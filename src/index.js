@@ -19,7 +19,6 @@ const path = require('path'),
         console.log(`Supported functions are [upload|download|downloadtagged]`)
         return process.exit(1)
     }
-
     
     try {
         switch(func.toLowerCase()){

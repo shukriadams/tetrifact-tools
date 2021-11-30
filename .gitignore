@@ -1,4 +1,4 @@
-vagrant/.vagrant
+
 build/linux64
 build/win64
 build/node_modules
@@ -11,3 +11,6 @@ src/tmp
 src/.getLatestArchiveWithTag
 src/.test.zip
 src/tetrifact.yml
+src/version.json
+vagrant/hyperv/.vagrant
+vagrant/virtualbox/.vagrant

@@ -24,3 +24,13 @@ Downloads and unpacks package `foo` from the given host to local folder `c:/pack
         --metadata c:/myrequest.json
 
 Downloads and unpacks the latest package with tags `foo` and `bar` from the given host to local folder `c:/packages/foo`. The `--metadata` argument is option, this is where a specific request will write information about its result, in this case, the exact path a package was written to, and the id of that package. This can be useful when using tetrifact-tool from script where the package id needs to be used.
+
+## Build locally
+
+Assuming you're working in Vagrant, build a Linux64 binary with
+
+    cd build
+    bash ./build.sh --target dev
+
+The output file is `build/linux64/tetrifact-tools`.
+
