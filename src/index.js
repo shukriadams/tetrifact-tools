@@ -14,7 +14,7 @@ const path = require('path'),
     if (argv.version || argv.v){
         const package = jsonfile.readFileSync(path.join( __dirname, '/version.json'))
         console.log(`tetrifact-tools, version ${package.version}`)
-        return process.exit(0)
+        return
     }
     
     if (!func){
@@ -51,6 +51,7 @@ const path = require('path'),
         }
     } catch (ex){
         console.error(`${ex}`)
+        return process.exit(1)
     }
     
  })()

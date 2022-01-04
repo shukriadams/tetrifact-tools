@@ -1,0 +1,17 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+    config.vm.box = "generic/ubuntu2004"
+    config.vm.hostname = "tetrifact-tools"
+    config.vm.synced_folder "./../..", "/vagrant", type: "nfs"
+    config.vm.provision :shell, path: "./../provision.sh"
+    config.vm.network "forwarded_port", guest: 49023, host: 49023
+    config.vm.network "forwarded_port", guest: 49024, host: 49024
+
+    config.vm.provider :libvirt do |v|
+        v.default_prefix = "tetrifact-tools"
+    end
+
+end

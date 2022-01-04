@@ -9,12 +9,12 @@ const process = require('process'),
     path = require('path')
 
 module.exports = async function(){
-    let argv = settingsProvider.merge(minimist(process.argv.slice(2))),
-        host = argv.host,
-        store = argv.store,
+    let args = settingsProvider.merge(minimist(process.argv.slice(2))),
+        host = args.host,
+        store = args.store,
         force = args.force || args.f,
-        tag = argv.tag,
-        packageMetaDataPath = argv.metadata
+        tag = args.tag,
+        packageMetaDataPath = args.metadata
 
     if (!host){
         console.error('ERROR : host not defined. Use --host <host>')
