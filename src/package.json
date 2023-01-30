@@ -12,7 +12,7 @@
         "minimist": "1.2.5",
         "jsonfile": "6.0.1",
         "urljoin": "0.1.5",
-        "unzip-stream": "0.3.1",
+        "unzipper": "0.10.11",
         "js-yaml": "3.13.1",
         "fs-extra": "9.0.1",
         "request": "2.88.2",

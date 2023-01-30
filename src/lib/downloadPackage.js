@@ -1,8 +1,8 @@
 const urljoin = require('urljoin'),
     fs = require('fs-extra'),
     path = require('path'),
-    fsUtils = require('madscience-fsUtils'),
-    httputils = require('madscience-httputils')
+    httputils = require('madscience-httputils'),
+    unzipper = require('unzipper')
 
 module.exports = async(host, store, pkg, force = false)=>{
 
@@ -57,9 +57,11 @@ module.exports = async(host, store, pkg, force = false)=>{
     // unzip
     try {
         console.log(`Uncompressing package`)
-        await fsUtils.unzipToDirectory(savePath, extractPath)
+        const directory = await unzipper.Open.file(savePath)
+        await directory.extract({path: extractPath})
+
     } catch (ex){
-        console.error(`ERROR : failed to unzip to ${savePath} to ${extractPath}`)
+        console.error(`ERROR : failed to unzip to ${savePath} to ${extractPath}:${ex}`)
         return process.exit(1)
     }
 
