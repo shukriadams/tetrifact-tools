@@ -36,7 +36,7 @@ fi
 # write version file
 echo "{ \"version\" : \"$tag\" }" > ./../src/version.json
 
-if [ "$target" = "" ]; then
+if [ -z "$target" ]; then
     echo "ERROR : --target not set. Can be linux64|win64|dev. (dev forces linux64 and uses pkg in /src/node_modules)"
     exit 1;
 fi
