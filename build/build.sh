@@ -6,21 +6,23 @@
 # fail on errors
 set -e 
 
-UPLOAD=0
-target=""
-repo=""
-token=""
+# dynamic variables used 
+#target= string
+#upload= bool
+#repo= string
+#token= string
 
-while [ -n "$1" ]; do 
-    case "$1" in
-    --upload) UPLOAD=1 ;;
-    --target)
-        target="$2" shift;;
-    --repo)
-        repo="$2" shift;;
-    --token)
-        token="$2" shift;;
-    esac 
+# capture all arguments passed in, that is anything starting with --
+while [ $# -gt 0 ]; do
+    if [[ $1 == *"--"* ]]; then
+        param="${1/--/}"
+        if [[ $2 == *"--"* ]]; then
+            # if next value is next parameter, declare this parameter as empty string
+            declare $param=true
+        else
+            declare $param="$2"
+        fi
+    fi
     shift
 done
 
@@ -37,7 +39,7 @@ fi
 echo "{ \"version\" : \"$tag\" }" > ./../src/version.json
 
 if [ -z "$target" ]; then
-    echo "ERROR : --target not set. Can be linux64|win64|dev. (dev forces linux64 and uses pkg in /src/node_modules)"
+    echo "ERROR1 : --target not set. Can be linux64|win64|dev. (dev forces linux64 and uses pkg in /src/node_modules)"
     exit 1;
 fi
 
@@ -79,7 +81,7 @@ fi
 
 echo "App built"
 
-if [ "$UPLOAD" = 1 ]; then
+if [ "$upload" ]; then
 
     # ensure required arguments were passed in
     if [ -z "$repo" ]; then
