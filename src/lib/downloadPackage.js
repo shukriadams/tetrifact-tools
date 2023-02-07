@@ -2,7 +2,7 @@ const urljoin = require('urljoin'),
     fs = require('fs-extra'),
     path = require('path'),
     httputils = require('madscience-httputils'),
-    unzipper = require('unzipper')
+    StreamZip = require('node-stream-zip')
 
 module.exports = async(host, store, pkg, force = false)=>{
 
@@ -57,9 +57,10 @@ module.exports = async(host, store, pkg, force = false)=>{
     // unzip
     try {
         console.log(`Uncompressing package`)
-        const directory = await unzipper.Open.file(savePath)
-        await directory.extract({path: extractPath})
-
+        const zip = new StreamZip.async({ file: savePath })
+        await fs.ensureDir(extractPath)
+        const count = await zip.extract(null, extractPath)
+        console.log(`extracted ${count} files`)
     } catch (ex){
         console.error(`ERROR : failed to unzip to ${savePath} to ${extractPath}:${ex}`)
         return process.exit(1)

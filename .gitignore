@@ -16,3 +16,4 @@ vagrant/hyperv/.vagrant
 vagrant/virtualbox/.vagrant
 dev/data
 vagrant/qemu/.vagrant
+src/store
