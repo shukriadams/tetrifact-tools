@@ -3,7 +3,7 @@ const path = require('path'),
     process = require('process'),
     minimist = require('minimist');
 
- (async function(){
+ (async()=>{
 
     const argv = minimist(process.argv.slice(2)),
         func = process.argv[2]
@@ -41,10 +41,22 @@ const path = require('path'),
                 break
             }
 
+            case 'uploadpartial':{
+                const uploadPartial = require('./lib/uploadPartial')
+                const localPath = process.argv[3]
+                if (!localPath){
+                    console.error('path to local package required')
+                    return process.exit(1)
+                }
+
+                await uploadPartial(localPath)
+                break
+            }
+
             default:{  
                 if (func)
                     console.log(`"${func}" is not a supported function. `)
-                console.log(`Tetrifact tool - supported functions are [upload|download|downloadtagged]`)
+                console.log(`Tetrifact tool - supported functions are [upload|download|downloadtagged|uploadpartial]`)
             }
         }
     } catch (ex){

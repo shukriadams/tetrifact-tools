@@ -11,3 +11,5 @@ src/tmp
 src/.getLatestArchiveWithTag
 src/.test.zip
 src/tetrifact.yml
+vagrant/qemu
+src/store

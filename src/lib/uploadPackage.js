@@ -2,6 +2,7 @@ const process = require('process'),
     minimist = require('minimist'),
     urljoin = require('urljoin'),
     request = require('request'),
+    hashHelper = require('./hashHelper'),
     fs = require('fs-extra'),
     fsUtils = require('madscience-fsUtils'),
     settingsProvider = require('./settings'),
@@ -35,41 +36,6 @@ const upload = async function (url, filePath){
             })
         }catch(ex){
             reject (ex)
-        }
-    })
-}
-
-const SHA256FromData = function(data){
-    const crypto = require('crypto'),
-        shasum = crypto.createHash('sha256')
-
-    shasum.update(data)
-    return shasum.digest('hex')
-}    
-
-
-const SHA256fromFile = async filePath =>{
-    const crypto = require('crypto'),
-        shasum = crypto.createHash('sha256')
-
-    return new Promise(async (resolve, reject)=>{
-        try {
-            const s = fs.ReadStream(filePath)
-
-            s.on('data', data => {
-                shasum.update(data)
-            })
-            
-            s.on('error', err =>{
-                reject(err)
-            })
-
-            s.on('end', ()=>{
-                resolve(shasum.digest('hex'))
-            })
-
-        } catch(ex) {
-            reject(ex)
         }
     })
 }
@@ -118,11 +84,11 @@ module.exports = async()=>{
     })
 
     for (const packageFileName of packageFileNames){
-        packageHashes += SHA256FromData(removePathRoot(sourcePath, packageFileName))
-        packageHashes += await SHA256fromFile(packageFileName) 
+        packageHashes += hashHelper.SHA256FromData(removePathRoot(sourcePath, packageFileName))
+        packageHashes += await hashHelper.SHA256fromFile(packageFileName) 
     }
 
-    packageHashes = SHA256FromData(packageHashes)
+    packageHashes = hashHelper.SHA256FromData(packageHashes)
 
     try {
         await fsUtils.zipDir(sourcePath, archivePath)
