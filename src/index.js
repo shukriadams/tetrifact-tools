@@ -43,13 +43,7 @@ const path = require('path'),
 
             case 'uploadpartial':{
                 const uploadPartial = require('./lib/uploadPartial')
-                const localPath = process.argv[3]
-                if (!localPath){
-                    console.error('path to local package required')
-                    return process.exit(1)
-                }
-
-                await uploadPartial(localPath)
+                await uploadPartial()
                 break
             }
 
@@ -60,7 +54,7 @@ const path = require('path'),
             }
         }
     } catch (ex){
-        console.error(`${ex}`)
+        console.error(ex)
     }
     
  })()
