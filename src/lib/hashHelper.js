@@ -58,6 +58,8 @@ module.exports = {
             const fileHash = await this.SHA256fromFile(packageFile)
             packageFile = fsUtils.toUnixPath(path.resolve(packageFile))
             let relativePath = fsUtils.toUnixPath(packageFile.replace(packagePathUnixPath, ''))
+            if (relativePath.startsWith('/'))
+                relativePath = relativePath.substring(1)
 
             packageSummary.files.push({
                 path : relativePath,

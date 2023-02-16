@@ -3,6 +3,7 @@ const request = require('request'),
 
 module.exports = {
     async uploadData(url, data){
+
         return new Promise((resolve, reject)=>{
             try {
     

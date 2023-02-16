@@ -13,3 +13,4 @@ src/.test.zip
 src/tetrifact.yml
 vagrant/qemu
 src/store
+package-lock.json

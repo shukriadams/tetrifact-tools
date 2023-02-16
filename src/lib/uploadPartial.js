@@ -7,10 +7,11 @@ const fsUtils = require('madscience-fsUtils'),
     uploadHelper = require('./uploadHelper'),
     fs = require('fs-extra')
 
-module.exports = async (packagePath) => {
+module.exports = async () => {
     const args = settingsProvider.merge(minimist(process.argv.slice(2))),
         host = args.host,
         sourcePath = args.path,
+        stageDirectory = args.stage,
         package = args.package
         
     if (!host){
@@ -28,37 +29,54 @@ module.exports = async (packagePath) => {
         return process.exit(1)
     }
 
+    if (!stageDirectory){
+        console.error('ERROR : stage path not defined. Use --stage <path> or add to settings')
+        return process.exit(1)
+    }
+
     const pkg = await hashHelper.createPartialManifest(sourcePath)
     
     // await fs.writeJson('./tmp/pkg.json', pkg)
     // post manifest to tetrifact, get diff manifest back
-    const diffManifest = { files : pkg } 
+    
     const url = urljoin(host, 'v1/packages/findexisting')
     const result = await uploadHelper.uploadData(url, { Manifest : JSON.stringify(pkg) })
-    console.log(JSON.stringify( result))
+    
+    if (!result.success)
+        throw result
 
-    return
+    const diffManifest = result.success.manifest
+    const uploadFiles = []
 
-    if (diffManifest.files.length > 30000){
-        // upload entire 
-    } else {
-        // upload partial
+    // console.log(JSON.stringify( result))
+    for(let file of pkg.files)
+        if (!diffManifest.existing.find(e => e.path === file.path))
+            uploadFiles.push(file)
 
+    // stage it
+    const stagePkgDirectory = path.join(stageDirectory, package)
+    if (await fs.exists(stagePkgDirectory))
+        await fs.remove(stagePkgDirectory) 
 
-        // stage files in new location
-        let stageDirectory = '' 
-        await fs.ensureDir(stageDirectory)
+    await fs.ensureDir(stagePkgDirectory)
 
-        for (let diffManifestFile of diffManifest.files){
-            const currentPath = path.join(packagePath, diffManifestFile.path)
-                stagePath = path.join(stageDirectory, diffManifestFile.path)
+    for (let uploadFile of uploadFiles){
+        const currentPath = path.join(sourcePath, uploadFile.path)
+            stagePath = path.join(stagePkgDirectory, uploadFile.path)
 
-            await fs.copy(currentPath, stagePath)
-        }
-        
-        // zip stage dir
-        
-        // post zip + diffManifest to tetrifact
-
+        await fs.copy(currentPath, stagePath)
     }
+
+    // zip stage dir
+    const archivePath = path.join(stageDirectory, `${package}.zip`)
+    await fsUtils.zipDir(stagePkgDirectory, archivePath)
+    
+    // push zip + existing manifest together
+    const pkgPostUrl = urljoin(host, 'v1/packages', package, '?isArchive=true')
+    const postResult = await uploadHelper.uploadData(pkgPostUrl, {
+        Files: fs.createReadStream(archivePath),
+        ExistingFiles : JSON.stringify(diffManifest.existing)
+    })
+
+    console.log(postResult)
 }
