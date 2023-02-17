@@ -4,7 +4,7 @@ const path = require('path'),
     settingsProvider = require('./lib/settings'),
     minimist = require('minimist');
 
- (async function(){
+ (async()=>{
 
     const argv = minimist(process.argv.slice(2)),
         func = process.argv[2]
@@ -19,7 +19,7 @@ const path = require('path'),
     
     if (!func){
         console.error(`error - no function specified. use tetrifact-tools <function> [optional args]`)
-        console.log(`Supported functions are [upload|download|downloadtagged]`)
+        console.log(`Supported functions are [upload|uploadpartial|download|downloadtagged]`)
         return process.exit(1)
     }
     
@@ -43,14 +43,20 @@ const path = require('path'),
                 break
             }
 
+            case 'uploadpartial':{
+                const uploadPartial = require('./lib/uploadPartial')
+                await uploadPartial()
+                break
+            }
+
             default:{  
                 if (func)
                     console.log(`"${func}" is not a supported function. `)
-                console.log(`Tetrifact tool - supported functions are [upload|download|downloadtagged]`)
+                console.log(`Tetrifact tool - supported functions are [upload|download|downloadtagged|uploadpartial]`)
             }
         }
     } catch (ex){
-        console.error(`${ex}`)
+        console.error(ex)
         return process.exit(1)
     }
     

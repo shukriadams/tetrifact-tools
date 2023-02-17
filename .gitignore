@@ -17,3 +17,4 @@ vagrant/virtualbox/.vagrant
 dev/data
 vagrant/qemu/.vagrant
 src/store
+src/tetrifact.yml
