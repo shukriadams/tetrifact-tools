@@ -27,11 +27,14 @@ module.exports = async(store, maxPackages)=>{
             0
     })
 
+    console.log(`autopurge found ${downloadedPackages.length} local packages, maximum allowed is ${maxPackages}`)
+
     if (downloadedPackages.length > maxPackages){
         downloadedPackages = downloadedPackages.map(r => r.package).slice(0, downloadedPackages.length - maxPackages)
         for (const downloadedPackage of downloadedPackages){
             await fs.remove(path.join(store, downloadedPackage))
             await fs.remove(path.join(store, downloadedPackage.substr(1)))
+            console.log(`autopurge deleted package ${downloadedPackage}`)
         }
     }
 }

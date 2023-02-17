@@ -34,26 +34,20 @@ module.exports = async () => {
         return process.exit(1)
     }
 
-    const pkg = await hashHelper.createPartialManifest(sourcePath)
+    const manifest = await hashHelper.createManifest(sourcePath)
+    const filteredManifestResult = await uploadHelper.uploadData(urljoin(host, 'v1/packages/filterexistingfiles'), { Manifest : JSON.stringify(manifest) })
     
-    // await fs.writeJson('./tmp/pkg.json', pkg)
-    // post manifest to tetrifact, get diff manifest back
-    
-    const url = urljoin(host, 'v1/packages/findexisting')
-    const result = await uploadHelper.uploadData(url, { Manifest : JSON.stringify(pkg) })
-    
-    if (!result.success)
-        throw result
+    if (!filteredManifestResult.success)
+        throw filteredManifestResult
 
-    const diffManifest = result.success.manifest
-    const uploadFiles = []
+    const filteredManifest = filteredManifestResult.success.manifest,
+        uploadFiles = []
 
-    // console.log(JSON.stringify( result))
-    for(let file of pkg.files)
-        if (!diffManifest.existing.find(e => e.path === file.path))
+    for(let file of manifest.files)
+        if (!filteredManifest.files.find(filteredFile => filteredFile.path === file.path))
             uploadFiles.push(file)
 
-    // stage it
+    // stage files that should be uploaded
     const stagePkgDirectory = path.join(stageDirectory, package)
     if (await fs.exists(stagePkgDirectory))
         await fs.remove(stagePkgDirectory) 
@@ -75,8 +69,11 @@ module.exports = async () => {
     const pkgPostUrl = urljoin(host, 'v1/packages', package, '?isArchive=true')
     const postResult = await uploadHelper.uploadData(pkgPostUrl, {
         Files: fs.createReadStream(archivePath),
-        ExistingFiles : JSON.stringify(diffManifest.existing)
+        ExistingFiles : JSON.stringify(filteredManifest.files)
     })
 
-    console.log(postResult)
+    if (postResult.success)
+        return console.log('Upload complete')
+    else 
+        return console.error(`Upload error`, postResult)
 }

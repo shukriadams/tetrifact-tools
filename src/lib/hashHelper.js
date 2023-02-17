@@ -35,7 +35,7 @@ module.exports = {
         })
     },
 
-    async createPartialManifest(packagePath){
+    async createManifest(packagePath){
         const fsUtils = require('madscience-fsUtils'),
             path = require('path'),
             fs = require('fs-extra')
@@ -46,7 +46,7 @@ module.exports = {
         // resolve absolute to replace
         const packagePathUnixPath = fsUtils.toUnixPath(path.resolve(packagePath))
 
-        const packageSummary = {
+        const manifest = {
                 files : [],
                 hash : null
             },
@@ -61,12 +61,12 @@ module.exports = {
             if (relativePath.startsWith('/'))
                 relativePath = relativePath.substring(1)
 
-            packageSummary.files.push({
+            manifest.files.push({
                 path : relativePath,
                 hash: fileHash
             })
         }
 
-        return packageSummary
+        return manifest
     }
 }
