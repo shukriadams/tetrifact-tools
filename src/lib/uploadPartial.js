@@ -34,7 +34,10 @@ module.exports = async () => {
         return process.exit(1)
     }
 
+    console.log(`generating manifest of package at ${sourcePath}`)
     const manifest = await hashHelper.createManifest(sourcePath)
+
+    console.log(`Posting manifest to ${host} to find existing files`)
     const filteredManifestResult = await uploadHelper.uploadData(urljoin(host, 'v1/packages/filterexistingfiles'), { Manifest : JSON.stringify(manifest) })
     
     if (!filteredManifestResult.success)
@@ -43,6 +46,7 @@ module.exports = async () => {
     const filteredManifest = filteredManifestResult.success.manifest,
         uploadFiles = []
 
+    console.log(`Query of existing files found ${manifest.files.length} matches`)
     for(let file of manifest.files)
         if (!filteredManifest.files.find(filteredFile => filteredFile.path === file.path))
             uploadFiles.push(file)
@@ -54,6 +58,7 @@ module.exports = async () => {
 
     await fs.ensureDir(stagePkgDirectory)
 
+    console.log(`Generating local zip of files not on host`)
     for (let uploadFile of uploadFiles){
         const currentPath = path.join(sourcePath, uploadFile.path)
             stagePath = path.join(stagePkgDirectory, uploadFile.path)
@@ -62,10 +67,12 @@ module.exports = async () => {
     }
 
     // zip stage dir
+    console.log(`Packing file to send`)
     const archivePath = path.join(stageDirectory, `${package}.zip`)
     await fsUtils.zipDir(stagePkgDirectory, archivePath)
     
     // push zip + existing manifest together
+    console.log('Uploading package')
     const pkgPostUrl = urljoin(host, 'v1/packages', package, '?isArchive=true')
     const postResult = await uploadHelper.uploadData(pkgPostUrl, {
         Files: fs.createReadStream(archivePath),

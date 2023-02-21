@@ -37,7 +37,9 @@ module.exports = async()=>{
         return process.exit(1)
     }
 
-    let archivePath = path.join(process.cwd(), `~${new Date().getTime()}` ),
+    
+    console.log(`generating a list of all files in ${sourcePath}`)
+    let archivePath = path.join(process.cwd(), `~${package}` ),
         url = urljoin(host, 'v1/packages', package, '?isArchive=true')
         packageHashes = '',
         packageFileNames = await fsUtils.readFilesUnderDir(sourcePath)
@@ -52,30 +54,41 @@ module.exports = async()=>{
             0
     })
 
+    console.log('generating hash of package files')
+    let count = 0,
+        total = packageFileNames.length
+
     for (const packageFileName of packageFileNames){
         packageHashes += hashHelper.SHA256FromData(removePathRoot(sourcePath, packageFileName))
         packageHashes += await hashHelper.SHA256fromFile(packageFileName) 
+        count ++
+        if (count % 100 === 0)
+            process.stdout.write(`${count}/${total}`.padEnd(50) + '\x1b[0G')
     }
 
     packageHashes = hashHelper.SHA256FromData(packageHashes)
 
-    try {
-        await fsUtils.zipDir(sourcePath, archivePath)
+    console.log('generating zip of local files')
 
+
+    try {
+        if (!await fs.exists(archivePath))
+            await fsUtils.zipDir(sourcePath, archivePath)
+
+        console.log('uploading zip')
         const result = await uploadHelper.upload(url, archivePath)
         if (!result.success){
             return console.error(`Upload error`, result)
         }
 
-        if (result.success.hash === packageHashes)
+        if (result.success.hash === packageHashes){
             console.log(`SUCCESS - package ${result.success.id} uploaded`)
+            await fs.remove(archivePath)
+        }
         else
             console.error(`ERROR - local hash ${packageHashes} does not match remote ${result.success.hash}`)
         
     } catch(ex){
         console.log(ex)
-    } finally {
-        await fs.remove(archivePath)
-    }
-
-}    
+    } 
+}
