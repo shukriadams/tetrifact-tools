@@ -46,14 +46,20 @@ module.exports = {
         // resolve absolute to replace
         const packagePathUnixPath = fsUtils.toUnixPath(path.resolve(packagePath))
 
+        console.log('generating list of package files')
+        
         const manifest = {
                 files : [],
                 hash : null
             },
             packageFiles = await fsUtils.readFilesUnderDir(packagePath)
             
-        
+        let count, 
+            total = packageFiles.length
+
         for (let packageFile of packageFiles){
+            
+            count ++
 
             const fileHash = await this.SHA256fromFile(packageFile)
             packageFile = fsUtils.toUnixPath(path.resolve(packageFile))
@@ -65,6 +71,8 @@ module.exports = {
                 path : relativePath,
                 hash: fileHash
             })
+
+            console.log(`processing file ${count}/${total}`)
         }
 
         return manifest

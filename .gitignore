@@ -14,3 +14,6 @@ src/tetrifact.yml
 vagrant/qemu
 src/store
 package-lock.json
+src/~*
+src/.stage
+

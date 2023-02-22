@@ -5,10 +5,11 @@ const fsUtils = require('madscience-fsUtils'),
     minimist = require('minimist'),
     settingsProvider = require('./settings'),
     uploadHelper = require('./uploadHelper'),
+    urlHelper = require('./urlHelper'),
     fs = require('fs-extra')
 
 module.exports = async () => {
-    const args = settingsProvider.merge(minimist(process.argv.slice(2))),
+    let args = settingsProvider.merge(minimist(process.argv.slice(2))),
         host = args.host,
         sourcePath = args.path,
         stageDirectory = args.stage,
@@ -30,12 +31,22 @@ module.exports = async () => {
     }
 
     if (!stageDirectory){
-        console.error('ERROR : stage path not defined. Use --stage <path> or add to settings')
-        return process.exit(1)
+        stageDirectory = './.stage'
+        console.log('WARNING : stage path not defined. using app path as stage')
     }
 
+    host = urlHelper.ensureFormat(host)
+
     console.log(`generating manifest of package at ${sourcePath}`)
-    const manifest = await hashHelper.createManifest(sourcePath)
+    let manifestFilePath = path.join(stageDirectory, 'package.manifest'),
+        manifest = ''
+        
+    if (await fs.exists(manifestFilePath)){
+        manifest = await fs.readJson(manifestFilePath) 
+    } else {
+        manifest = await hashHelper.createManifest(sourcePath)
+        await fs.writeJson(manifestFilePath, manifest)
+    }
 
     console.log(`Posting manifest to ${host} to find existing files`)
     const filteredManifestResult = await uploadHelper.uploadData(urljoin(host, 'v1/packages/filterexistingfiles'), { Manifest : JSON.stringify(manifest) })
