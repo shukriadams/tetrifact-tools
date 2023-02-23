@@ -54,7 +54,7 @@ module.exports = {
             },
             packageFiles = await fsUtils.readFilesUnderDir(packagePath)
             
-        let count, 
+        let count = 0, 
             total = packageFiles.length
 
         for (let packageFile of packageFiles){

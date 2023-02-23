@@ -2,6 +2,7 @@ const fsUtils = require('madscience-fsUtils'),
     hashHelper = require('./hashHelper'),
     path = require('path'),
     urljoin = require('urljoin'),
+    timebelt = require('timebelt'),
     minimist = require('minimist'),
     settingsProvider = require('./settings'),
     uploadHelper = require('./uploadHelper'),
@@ -10,6 +11,7 @@ const fsUtils = require('madscience-fsUtils'),
 
 module.exports = async () => {
     let args = settingsProvider.merge(minimist(process.argv.slice(2))),
+        start = new Date(),
         host = args.host,
         sourcePath = args.path,
         stageDirectory = args.stage,
@@ -44,8 +46,10 @@ module.exports = async () => {
     if (await fs.exists(manifestFilePath)){
         manifest = await fs.readJson(manifestFilePath) 
     } else {
+        let manifestStart = new Date()
         manifest = await hashHelper.createManifest(sourcePath)
         await fs.writeJson(manifestFilePath, manifest)
+        console.log(`Manifest created in ${timebelt.minutesDifference(new Date(), manifestStart )} minutes`)
     }
 
     console.log(`Posting manifest to ${host} to find existing files`)
@@ -91,7 +95,7 @@ module.exports = async () => {
     })
 
     if (postResult.success)
-        return console.log('Upload complete')
+        return console.log(`Upload complete, took ${timebelt.minutesDifference(new Date(), start )} minutes`)
     else 
         return console.error(`Upload error`, postResult)
 }
