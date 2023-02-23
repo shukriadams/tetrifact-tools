@@ -1,3 +1,5 @@
+const timebelt = require('timebelt')
+
 module.exports = {
 
     SHA256FromData (data){
@@ -36,45 +38,89 @@ module.exports = {
     },
 
     async createManifest(packagePath){
-        const fsUtils = require('madscience-fsUtils'),
-            path = require('path'),
-            fs = require('fs-extra')
+        return new Promise(async (resolve, reject)=>{
+            try {
 
-        if (!await fs.exists(packagePath))
-            throw `Directory ${packagePath} does not exisit`
-
-        // resolve absolute to replace
-        const packagePathUnixPath = fsUtils.toUnixPath(path.resolve(packagePath))
-
-        console.log('generating list of package files')
+                const fsUtils = require('madscience-fsUtils'),
+                    { Worker } = require('worker_threads'),
+                    path = require('path'),
+                    fs = require('fs-extra')
         
-        const manifest = {
-                files : [],
-                hash : null
-            },
-            packageFiles = await fsUtils.readFilesUnderDir(packagePath)
+                if (!await fs.exists(packagePath))
+                    throw `Directory ${packagePath} does not exisit`
+        
+                // resolve absolute to replace
+                const packagePathUnixPath = fsUtils.toUnixPath(path.resolve(packagePath))
+        
+                console.log('generating list of package files')
+        
+                
+                
+                const manifest = {
+                        files : [],
+                        hash : null
+                    },
+                    packageFiles = await fsUtils.readFilesUnderDir(packagePath)
+                    
+                let count = 0,
+                    maxThreads = 4,
+                    threads = 0,
+                    total = packageFiles.length
+        
+                
+                while(packageFiles.length){
+                    if(threads > maxThreads){
+                        await timebelt.pause(10)
+                        continue
+                    }
+
+                    threads++
+                    count++
+                    let packageFile = packageFiles[packageFiles.length -1];
+                    packageFiles.splice(packageFiles.length - 1, 1)
+
+                    packageFile = fsUtils.toUnixPath(path.resolve(packageFile))
+
+                    let relativePath = fsUtils.toUnixPath(packageFile.replace(packagePathUnixPath, ''))
+                    if (relativePath.startsWith('/'))
+                        relativePath = relativePath.substring(1)
+                    
+                    const worker = new Worker('./lib/SHA256fromFileWorker.js')
+                    // const fileHash = await this.SHA256fromFile(packageFile)
+                    worker.on('message', workerResult => {
+                        threads--
+                        if (threads < 0)
+                            threads = 0
+
+                        if (workerResult.err)
+                            return reject(workerResult.err)
+
+                        console.log(`processed file ${workerResult.count}/${total} (${threads} threads) ${workerResult.fileHash} ${workerResult.relativePath}`)
+
+                        manifest.files.push({
+                            path : workerResult.relativePath,
+                            hash: workerResult.fileHash
+                        })
             
-        let count = 0, 
-            total = packageFiles.length
+                        worker.terminate()
+                        
+                        if (!packageFiles.length && !threads){
+                            resolve(manifest)
+                        }
+                    })
 
-        for (let packageFile of packageFiles){
-            
-            count ++
+                    worker.postMessage({
+                        packageFile,
+                        relativePath,
+                        count
+                    })
 
-            const fileHash = await this.SHA256fromFile(packageFile)
-            packageFile = fsUtils.toUnixPath(path.resolve(packageFile))
-            let relativePath = fsUtils.toUnixPath(packageFile.replace(packagePathUnixPath, ''))
-            if (relativePath.startsWith('/'))
-                relativePath = relativePath.substring(1)
-
-            manifest.files.push({
-                path : relativePath,
-                hash: fileHash
-            })
-
-            console.log(`processing file ${count}/${total}`)
-        }
-
-        return manifest
+                }
+        
+            } catch(ex){
+                reject (ex)
+            }
+        })
+        
     }
 }

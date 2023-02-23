@@ -15,7 +15,8 @@ module.exports = async () => {
         host = args.host,
         sourcePath = args.path,
         stageDirectory = args.stage,
-        package = args.package
+        package = args.package,
+        force = args.force !== undefined
         
     if (!host){
         console.error('ERROR : host not defined. Use --host <host> or add to settings')
@@ -43,12 +44,13 @@ module.exports = async () => {
     let manifestFilePath = path.join(stageDirectory, 'package.manifest'),
         manifest = ''
         
-    if (await fs.exists(manifestFilePath)){
+    if (!force && await fs.exists(manifestFilePath)){
         manifest = await fs.readJson(manifestFilePath) 
+        console.log(`loaded cached manifest ${manifestFilePath}`)
     } else {
         let manifestStart = new Date()
         manifest = await hashHelper.createManifest(sourcePath)
-        await fs.writeJson(manifestFilePath, manifest)
+        await fs.writeJson(manifestFilePath, manifest, { spaces : 4 })
         console.log(`Manifest created in ${timebelt.minutesDifference(new Date(), manifestStart )} minutes`)
     }
 
