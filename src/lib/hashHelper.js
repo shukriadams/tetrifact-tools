@@ -37,11 +37,12 @@ module.exports = {
         })
     },
 
-    async createManifest(packagePath){
+    async createManifest(packagePath, maxThreads, verbose){
         return new Promise(async (resolve, reject)=>{
             try {
 
                 const fsUtils = require('madscience-fsUtils'),
+                    cons = require('./cons'),
                     { Worker } = require('worker_threads'),
                     path = require('path'),
                     fs = require('fs-extra')
@@ -52,9 +53,7 @@ module.exports = {
                 // resolve absolute to replace
                 const packagePathUnixPath = fsUtils.toUnixPath(path.resolve(packagePath))
         
-                console.log('generating list of package files')
-        
-                
+                cons.log('generating list of package files')
                 
                 const manifest = {
                         files : [],
@@ -63,10 +62,10 @@ module.exports = {
                     packageFiles = await fsUtils.readFilesUnderDir(packagePath)
                     
                 let count = 0,
-                    maxThreads = 4,
                     threads = 0,
                     total = packageFiles.length
         
+                cons.log(`generating manifest with ${maxThreads} threads`)
                 
                 while(packageFiles.length){
                     if(threads > maxThreads){
@@ -94,8 +93,9 @@ module.exports = {
 
                         if (workerResult.err)
                             return reject(workerResult.err)
-
-                        console.log(`processed file ${workerResult.count}/${total} (${threads} threads) ${workerResult.fileHash} ${workerResult.relativePath}`)
+                        
+                        if (verbose)
+                            cons.log(`processed file ${workerResult.count}/${total} (${threads} threads) ${workerResult.fileHash} ${workerResult.relativePath}`)
 
                         manifest.files.push({
                             path : workerResult.relativePath,

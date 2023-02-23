@@ -7,6 +7,7 @@ const fsUtils = require('madscience-fsUtils'),
     settingsProvider = require('./settings'),
     uploadHelper = require('./uploadHelper'),
     urlHelper = require('./urlHelper'),
+    httputils = require('madscience-httputils'),
     fs = require('fs-extra')
 
 module.exports = async () => {
@@ -16,6 +17,8 @@ module.exports = async () => {
         sourcePath = args.path,
         stageDirectory = args.stage,
         package = args.package,
+        threads = args.threads || 4,
+        verbose = args.verbose !== undefined,
         force = args.force !== undefined
         
     if (!host){
@@ -40,7 +43,17 @@ module.exports = async () => {
 
     host = urlHelper.ensureFormat(host)
 
+    // check if package exists on target
+    const packageTestUrl = urljoin(host, 'v1/packages/', package, 'exists' ),
+        existsLookup = await httputils.downloadJSON(packageTestUrl)
+        
+    if (existsLookup.success && existsLookup.success.exists){
+        console.log(`Package ${package} already exist`)
+        return
+    }
+
     console.log(`generating manifest of package at ${sourcePath}`)
+
     let manifestFilePath = path.join(stageDirectory, 'package.manifest'),
         manifest = ''
         
@@ -49,7 +62,7 @@ module.exports = async () => {
         console.log(`loaded cached manifest ${manifestFilePath}`)
     } else {
         let manifestStart = new Date()
-        manifest = await hashHelper.createManifest(sourcePath)
+        manifest = await hashHelper.createManifest(sourcePath, threads, verbose)
         await fs.writeJson(manifestFilePath, manifest, { spaces : 4 })
         console.log(`Manifest created in ${timebelt.minutesDifference(new Date(), manifestStart )} minutes`)
     }
