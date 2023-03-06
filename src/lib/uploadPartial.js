@@ -76,7 +76,7 @@ module.exports = async () => {
     const filteredManifest = filteredManifestResult.success.manifest,
         uploadFiles = []
 
-    console.log(`Query of existing files found ${manifest.files.length} matches`)
+    console.log(`Query of existing files found ${filteredManifest.files.length} matches out of ${manifest.files.length} files in total`)
     for(let file of manifest.files)
         if (!filteredManifest.files.find(filteredFile => filteredFile.path === file.path))
             uploadFiles.push(file)

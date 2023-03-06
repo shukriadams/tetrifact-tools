@@ -64,8 +64,6 @@ module.exports = {
                 let count = 0,
                     threads = 0,
                     total = packageFiles.length
-        
-                cons.log(`generating manifest with ${maxThreads} threads`)
                 
                 while(packageFiles.length){
                     if(threads > maxThreads){
@@ -85,7 +83,6 @@ module.exports = {
                         relativePath = relativePath.substring(1)
                     
                     const worker = new Worker('./lib/SHA256fromFileWorker.js')
-                    // const fileHash = await this.SHA256fromFile(packageFile)
                     worker.on('message', workerResult => {
                         threads--
                         if (threads < 0)
