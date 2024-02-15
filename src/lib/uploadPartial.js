@@ -48,7 +48,7 @@ module.exports = async () => {
         existsLookup = await httputils.downloadJSON(packageTestUrl)
         
     if (existsLookup.success && existsLookup.success.exists){
-        console.log(`Package ${package} already exist`)
+        console.log(`Package ${package} already exists`)
         return
     }
 
@@ -57,18 +57,25 @@ module.exports = async () => {
     let manifestFilePath = path.join(stageDirectory, 'package.manifest'),
         manifest = ''
         
-    if (!force && await fs.exists(manifestFilePath)){
+    if (await fs.exists(manifestFilePath)){
         manifest = await fs.readJson(manifestFilePath) 
         console.log(`loaded cached manifest ${manifestFilePath}`)
     } else {
         let manifestStart = new Date()
         manifest = await hashHelper.createManifest(sourcePath, threads, verbose)
+        
+        await fs.ensureDir(stageDirectory)
         await fs.writeJson(manifestFilePath, manifest, { spaces : 4 })
+
         console.log(`Manifest created in ${timebelt.minutesDifference(new Date(), manifestStart )} minutes`)
     }
 
     console.log(`Posting manifest to ${host} to find existing files`)
-    const filteredManifestResult = await uploadHelper.uploadData(urljoin(host, 'v1/packages/filterexistingfiles'), { Manifest : JSON.stringify(manifest) })
+    const filteredManifestResult = await uploadHelper.uploadData(urljoin(host, 'v1/packages/filterexistingfiles'), 
+        { 
+            Manifest : fs.createReadStream(manifestFilePath)
+        }
+    )
     
     if (!filteredManifestResult.success)
         throw filteredManifestResult
@@ -76,7 +83,7 @@ module.exports = async () => {
     const filteredManifest = filteredManifestResult.success.manifest,
         uploadFiles = []
 
-    console.log(`Query of existing files found ${filteredManifest.files.length} matches out of ${manifest.files.length} files in total`)
+    console.log(`Query of existing files found ${filteredManifest.files.length} common files out of ${manifest.files.length} files in total`)
     for(let file of manifest.files)
         if (!filteredManifest.files.find(filteredFile => filteredFile.path === file.path))
             uploadFiles.push(file)
@@ -101,12 +108,18 @@ module.exports = async () => {
     const archivePath = path.join(stageDirectory, `${package}.zip`)
     await fsUtils.zipDir(stagePkgDirectory, archivePath)
     
+    const commonFile = path.join(stageDirectory, `${package}_common.zip`)
+    await fs.writeJson(commonFile, filteredManifest.files, { spaces : 4 })
+
+
     // push zip + existing manifest together
     console.log('Uploading package')
-    const pkgPostUrl = urljoin(host, 'v1/packages', package, '?isArchive=true')
-    const postResult = await uploadHelper.uploadData(pkgPostUrl, {
+
+
+    const pkgPostUrl = urljoin(host, 'v1/packages', package, '?isArchive=true'),
+        postResult = await uploadHelper.uploadData(pkgPostUrl, {
         Files: fs.createReadStream(archivePath),
-        ExistingFiles : JSON.stringify(filteredManifest.files)
+        ExistingFiles : fs.createReadStream(commonFile)
     })
 
     if (postResult.success)
