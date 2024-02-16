@@ -7,6 +7,7 @@ const path = require('path'),
  (async()=>{
 
     const argv = minimist(process.argv.slice(2)),
+        allowedFunctions =  ['upload', 'download','downloadtagged', 'uploadpartial'],
         func = process.argv[2]
 
     settingsProvider.mergeArgs(argv)
@@ -19,12 +20,12 @@ const path = require('path'),
     
     if (!func){
         console.error(`error - no function specified. use tetrifact-tools <function> [optional args]`)
-        console.log(`Supported functions are [upload|uploadpartial|download|downloadtagged]`)
+        console.log(`Supported functions are [${allowedFunctions.join('|')}]`)
         return process.exit(1)
     }
     
     try {
-        switch(func.toLowerCase()){
+        switch(func.trim().toLowerCase()){
             
             case 'download':{
                 const getPackage = require('./lib/getPackage')
@@ -52,9 +53,10 @@ const path = require('path'),
             default:{  
                 if (func)
                     console.log(`"${func}" is not a supported function. `)
-                console.log(`Tetrifact tool - supported functions are [upload|download|downloadtagged|uploadpartial]`)
+                console.log(`Tetrifact tool - supported functions are [${allowedFunctions.join('|')}]`)
             }
         }
+        
     } catch (ex){
         console.error(ex)
         return process.exit(1)

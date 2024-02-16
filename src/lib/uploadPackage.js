@@ -6,6 +6,7 @@ const process = require('process'),
     fsUtils = require('madscience-fsUtils'),
     settingsProvider = require('./settings'),
     uploadHelper = require('./uploadHelper'),
+    urlHelper = require('./urlHelper'),
     path = require('path')
     
 
@@ -17,7 +18,7 @@ const removePathRoot = (root, thePath)=>{
 }
 
 module.exports = async()=>{
-    const args = settingsProvider.merge(minimist(process.argv.slice(2))),
+    let args = settingsProvider.merge(minimist(process.argv.slice(2))),
         host = args.host,
         sourcePath = args.path,
         package = args.package
@@ -37,45 +38,68 @@ module.exports = async()=>{
         return process.exit(1)
     }
 
-    let archivePath = path.join(process.cwd(), `~${new Date().getTime()}` ),
+    host = urlHelper.ensureFormat(host)
+    let hashFilePath = path.join(process.cwd(), `~${package}.hash`), 
+        archivePath = path.join(process.cwd(), `~${package}` ),
         url = urljoin(host, 'v1/packages', package, '?isArchive=true')
-        packageHashes = '',
-        packageFileNames = await fsUtils.readFilesUnderDir(sourcePath)
+        packageHashes = ''
 
-    packageFileNames = packageFileNames.sort((a, b)=> {
-        // to lowercase to match .net sorting 
-        a = a.toLowerCase()
-        b = b.toLowerCase()
+    if (await fs.exists(hashFilePath)){
+        packageHashes = await fs.readJson(hashFilePath)
+    } else {
 
-        return a > b ? 1 :
-            b > a ? -1 :
-            0
-    })
-
-    for (const packageFileName of packageFileNames){
-        packageHashes += hashHelper.SHA256FromData(removePathRoot(sourcePath, packageFileName))
-        packageHashes += await hashHelper.SHA256fromFile(packageFileName) 
+        console.log(`generating a list of all files in ${sourcePath}`)
+        let packageFileNames = await fsUtils.readFilesUnderDir(sourcePath)
+    
+        packageFileNames = packageFileNames.sort((a, b)=> {
+            // to lowercase to match .net sorting 
+            a = a.toLowerCase()
+            b = b.toLowerCase()
+    
+            return a > b ? 1 :
+                b > a ? -1 :
+                0
+        })
+    
+        console.log('generating hash of package files')
+        let count = 0,
+            total = packageFileNames.length
+    
+        for (const packageFileName of packageFileNames){
+            packageHashes += hashHelper.SHA256FromData(removePathRoot(sourcePath, packageFileName))
+            packageHashes += await hashHelper.SHA256fromFile(packageFileName) 
+            count ++
+            if (count % 100 === 0)
+                process.stdout.write(`${count}/${total}`.padEnd(50) + '\x1b[0G')
+        }
+    
+        packageHashes = hashHelper.SHA256FromData(packageHashes)
+        await fs.writeJson(hashFilePath, packageHashes)
     }
 
-    packageHashes = hashHelper.SHA256FromData(packageHashes)
+
 
     try {
-        await fsUtils.zipDir(sourcePath, archivePath)
 
+        if (!await fs.exists(archivePath)){
+            console.log('generating zip of local files')
+            await fsUtils.zipDir(sourcePath, archivePath)
+        }
+
+        console.log('uploading zip')
         const result = await uploadHelper.upload(url, archivePath)
         if (!result.success){
             return console.error(`Upload error`, result)
         }
 
-        if (result.success.hash === packageHashes)
+        if (result.success.hash === packageHashes){
             console.log(`SUCCESS - package ${result.success.id} uploaded`)
+            await fs.remove(archivePath)
+        }
         else
             console.error(`ERROR - local hash ${packageHashes} does not match remote ${result.success.hash}`)
         
     } catch(ex){
         console.log(ex)
-    } finally {
-        await fs.remove(archivePath)
-    }
-
-}    
+    } 
+}

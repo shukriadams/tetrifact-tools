@@ -1,3 +1,5 @@
+const timebelt = require('timebelt')
+
 module.exports = {
 
     SHA256FromData (data){
@@ -35,38 +37,87 @@ module.exports = {
         })
     },
 
-    async createManifest(packagePath){
-        const fsUtils = require('madscience-fsUtils'),
-            path = require('path'),
-            fs = require('fs-extra')
+    async createManifest(packagePath, maxThreads, verbose){
+        return new Promise(async (resolve, reject)=>{
+            try {
 
-        if (!await fs.exists(packagePath))
-            throw `Directory ${packagePath} does not exisit`
-
-        // resolve absolute to replace
-        const packagePathUnixPath = fsUtils.toUnixPath(path.resolve(packagePath))
-
-        const manifest = {
-                files : [],
-                hash : null
-            },
-            packageFiles = await fsUtils.readFilesUnderDir(packagePath)
-            
+                const fsUtils = require('madscience-fsUtils'),
+                    cons = require('./cons'),
+                    { Worker } = require('worker_threads'),
+                    path = require('path'),
+                    fs = require('fs-extra')
         
-        for (let packageFile of packageFiles){
+                if (!await fs.exists(packagePath))
+                    throw `Directory ${packagePath} does not exisit`
+        
+                // resolve absolute to replace
+                const packagePathUnixPath = fsUtils.toUnixPath(path.resolve(packagePath))
+        
+                cons.log('generating list of package files')
+                
+                const manifest = {
+                        files : [],
+                        hash : null
+                    },
+                    packageFiles = await fsUtils.readFilesUnderDir(packagePath)
+                    
+                let count = 0,
+                    threads = 0,
+                    total = packageFiles.length
+                
+                while(packageFiles.length){
+                    if(threads > maxThreads){
+                        await timebelt.pause(10)
+                        continue
+                    }
 
-            const fileHash = await this.SHA256fromFile(packageFile)
-            packageFile = fsUtils.toUnixPath(path.resolve(packageFile))
-            let relativePath = fsUtils.toUnixPath(packageFile.replace(packagePathUnixPath, ''))
-            if (relativePath.startsWith('/'))
-                relativePath = relativePath.substring(1)
+                    threads++
+                    count++
+                    let packageFile = packageFiles[packageFiles.length -1];
+                    packageFiles.splice(packageFiles.length - 1, 1)
 
-            manifest.files.push({
-                path : relativePath,
-                hash: fileHash
-            })
-        }
+                    packageFile = fsUtils.toUnixPath(path.resolve(packageFile))
 
-        return manifest
+                    let relativePath = fsUtils.toUnixPath(packageFile.replace(packagePathUnixPath, ''))
+                    if (relativePath.startsWith('/'))
+                        relativePath = relativePath.substring(1)
+                    
+                    const worker = new Worker('./lib/SHA256fromFileWorker.js')
+                    worker.on('message', workerResult => {
+                        threads--
+                        if (threads < 0)
+                            threads = 0
+
+                        if (workerResult.err)
+                            return reject(workerResult.err)
+                        
+                        if (verbose)
+                            cons.log(`processed file ${workerResult.count}/${total} (${threads} threads) ${workerResult.fileHash} ${workerResult.relativePath}`)
+
+                        manifest.files.push({
+                            path : workerResult.relativePath,
+                            hash: workerResult.fileHash
+                        })
+            
+                        worker.terminate()
+                        
+                        if (!packageFiles.length && !threads){
+                            resolve(manifest)
+                        }
+                    })
+
+                    worker.postMessage({
+                        packageFile,
+                        relativePath,
+                        count
+                    })
+
+                }
+        
+            } catch(ex){
+                reject (ex)
+            }
+        })
+        
     }
 }
