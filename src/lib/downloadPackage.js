@@ -32,12 +32,14 @@ module.exports = async(host, store, pkg, force = false)=>{
         status = await httputils.getStatus(remoteURL)
     } catch(ex){
         console.log(ex)
-        return process.exit(1)
+        process.exitCode = 1
+        return
     }
 
     if (status === 404){
         console.error(`ERROR : package ${remoteURL} does not exist`)
-        return process.exit(1)
+        process.exitCode = 1
+        return 
     }
 
     try {
@@ -45,7 +47,8 @@ module.exports = async(host, store, pkg, force = false)=>{
         await httputils.downloadFile(remoteURL, savePath)
     } catch(ex){
         console.error(`ERROR : ${ex}`)
-        return process.exit(1)
+        process.exitCode = 1
+        return 
     }
 
     // check if the downloaded file is empty, this is often caused by specifying the wrong protocol
@@ -63,7 +66,8 @@ module.exports = async(host, store, pkg, force = false)=>{
         console.log(`extracted ${count} files`)
     } catch (ex){
         console.error(`ERROR : failed to unzip to ${savePath} to ${extractPath}:${ex}`)
-        return process.exit(1)
+        process.exitCode = 1
+        return
     }
 
     await fs.remove(savePath)

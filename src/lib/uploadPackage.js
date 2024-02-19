@@ -25,17 +25,20 @@ module.exports = async()=>{
         
     if (!host){
         console.error('ERROR : host not defined. Use --host <host> or add to settings')
-        return process.exit(1)
+        process.exitCode = 1
+        return 
     }
 
     if (!package){
         console.error('ERROR : package not defined. Use --package <package>')
-        return process.exit(1)
+        process.exitCode = 1
+        return 
     }
 
     if (!sourcePath){
         console.error('ERROR : source path not defined. Use --path <path> or add to settings')
-        return process.exit(1)
+        process.exitCode = 1
+        return 
     }
 
     host = urlHelper.ensureFormat(host)

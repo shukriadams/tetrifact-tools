@@ -2,6 +2,7 @@ const path = require('path'),
     jsonfile = require('jsonfile'),
     process = require('process'),
     settingsProvider = require('./lib/settings'),
+    log = require('./lib/log')
     minimist = require('minimist');
 
  (async()=>{
@@ -15,13 +16,15 @@ const path = require('path'),
     if (argv.version || argv.v){
         const package = jsonfile.readFileSync(path.join( __dirname, '/version.json'))
         console.log(`tetrifact-tools, version ${package.version}`)
-        return
+        process.exitCode = 0
+        return 0
     }
-    
+
     if (!func){
-        console.error(`error - no function specified. use tetrifact-tools <function> [optional args]`)
+        console.log(`error - no function specified. use tetrifact-tools <function> [optional args]`)
         console.log(`Supported functions are [${allowedFunctions.join('|')}]`)
-        return process.exit(1)
+        process.exitCode = 1
+        return
     }
     
     try {
@@ -58,8 +61,8 @@ const path = require('path'),
         }
         
     } catch (ex){
-        console.error(ex)
-        return process.exit(1)
+        log.error(ex)
+        process.exitCode = 1
     }
     
  })()

@@ -12,7 +12,12 @@ let fs = require('fs-extra'),
         purge : false,
 
         // number of packages to keep if purge is enabled
-        keep: 2
+        keep: 2,
+
+        logDir: null,
+
+        // can be error|warn|info|debug in order of increasing spamminess.
+        logLevel: 'warn'
     }
 
  // Load settings from YML file, merge with default settings
@@ -54,6 +59,9 @@ if (settings.keep < 1){
     console.log(`Keep was set to ${settings.keep} but a minimum of 1 is permitted`)
     settings.keep = 1
 }
+
+if (!settings.logDir)
+   settings.logDir = './logs'
 
 module.exports = {
     get (){

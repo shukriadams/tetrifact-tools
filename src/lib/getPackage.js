@@ -13,24 +13,28 @@ module.exports = async function(){
 
     if (!host){
         console.error('ERROR : host not defined. Use --host <host>')
-        return process.exit(1)
+        process.exitCode = 1
+        return 
     }
 
     if (!store){
         console.error('ERROR : store not defined. Use --store <store>')
-        return process.exit(1)
+        process.exitCode = 1
+        return
     }
 
     const tmphost = host.toLowerCase()
     if (!tmphost.startsWith('http://') && !tmphost.startsWith('https://')){
         console.error('ERROR : host malformed, must start with http:// or https://')
-        return process.exit(1)
+        process.exitCode = 1
+        return 
     }
 
 
     if (!pkg){
         console.error('ERROR : package not defined. Use --package <package>')
-        return process.exit(1)
+        process.exitCode = 1
+        return
     }
 
     const extractPath = await downloadPackage(host, store, pkg.toString(), force)

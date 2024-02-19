@@ -18,23 +18,27 @@ module.exports = async function(){
 
     if (!host){
         console.error('ERROR : host not defined. Use --host <host>')
-        return process.exit(1)
+        process.exitCode = 1
+        return
     }
 
     if (!store){
         console.error('ERROR : store not defined. Use --store <store>')
-        return process.exit(1)
+        process.exitCode = 1
+        return 
     }
 
     const tmphost = host.toLowerCase()
     if (!tmphost.startsWith('http://') && !tmphost.startsWith('https://')){
         console.error('ERROR : host malformed, must start with http:// or https://')
-        return process.exit(1)
+        process.exitCode = 1
+        return
     }
 
     if (!tag){
         console.error('ERROR : tag not defined. Use --tag <tag>')
-        return process.exit(1)
+        process.exitCode = 1
+        return 
     }
 
     // path will not accept numbers, if latest code happens to be an int
@@ -52,28 +56,33 @@ module.exports = async function(){
         else
             console.log(ex)
 
-        return process.exit(1)
+        process.exitCode = 1
+        return
     }
 
     if (taglookup.statusCode === 404){
         console.log(`No packages with tag ${tag} were found`)
-        return process.exit(1)
+        process.exitCode = 1
+        return 
     }
 
     if (taglookup.statusCode !== 200){
         console.log(`Error doing tag request : ${taglookup.body}`)
-        return process.exit(1)
+        process.exitCode = 1
+        return 
     }
 
     const packageInfo = JSON.parse(taglookup.body)
     if (!packageInfo.success){
         console.log(`Error looking up package : ${packageInfo}`)
-        return process.exit(1)
+        process.exitCode = 1
+        return 
     }
 
     if (!packageInfo.success.package){
         console.log(`Couldn't find packages matching tags : ${tag}`)
-        return process.exit(1)
+        process.exitCode = 1
+        return
     }
 
 
