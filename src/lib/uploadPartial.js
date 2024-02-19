@@ -7,6 +7,7 @@ const fsUtils = require('madscience-fsUtils'),
     settingsProvider = require('./settings'),
     uploadHelper = require('./uploadHelper'),
     urlHelper = require('./urlHelper'),
+    log = require('./log'),
     httputils = require('madscience-httputils'),
     fs = require('fs-extra')
 
@@ -22,19 +23,19 @@ module.exports = async () => {
         force = args.force !== undefined
         
     if (!host){
-        console.error('ERROR : host not defined. Use --host <host> or add to settings')
+        log.error('ERROR : host not defined. Use --host <host> or add to settings')
         process.exitCode = 1
         return
     }
 
     if (!package){
-        console.error('ERROR : package not defined. Use --package <package>')
+        log.error('ERROR : package not defined. Use --package <package>')
         process.exitCode = 1
         return
     }
 
     if (!sourcePath){
-        console.error('ERROR : source path not defined. Use --path <path> or add to settings')
+        log.error('ERROR : source path not defined. Use --path <path> or add to settings')
         process.exitCode = 1
         return
     }
@@ -128,5 +129,5 @@ module.exports = async () => {
     if (postResult.success)
         return console.log(`Upload complete, took ${timebelt.minutesDifference(new Date(), start )} minutes`)
     else 
-        return console.error(`Upload error`, postResult)
+        return log.error(`Upload error`, postResult)
 }

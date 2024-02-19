@@ -1,6 +1,7 @@
 const urljoin = require('urljoin'),
     fs = require('fs-extra'),
     path = require('path'),
+    log = require('./log'),
     httputils = require('madscience-httputils'),
     StreamZip = require('node-stream-zip')
 
@@ -19,9 +20,9 @@ module.exports = async(host, store, pkg, force = false)=>{
     // can be created but still be in an error state. Use the post-unpack flag instead
     if (await fs.exists(extractedFlag)){
         if (force){
-            console.log(`Package already exists locally, proceeding with forced download.`)
+            console.log(`Package ${pkg} already exists locally, proceeding with forced download.`)
         } else {
-            console.log(`Package already exists locally, skipping download.`)
+            console.log(`Package ${pkg} already exists locally, skipping download.`)
             return extractPath
         }
     }
@@ -31,13 +32,13 @@ module.exports = async(host, store, pkg, force = false)=>{
     try{
         status = await httputils.getStatus(remoteURL)
     } catch(ex){
-        console.log(ex)
+        log.error(ex)
         process.exitCode = 1
         return
     }
 
     if (status === 404){
-        console.error(`ERROR : package ${remoteURL} does not exist`)
+        log.error(`ERROR : package ${remoteURL} does not exist`)
         process.exitCode = 1
         return 
     }
@@ -46,7 +47,7 @@ module.exports = async(host, store, pkg, force = false)=>{
         console.log(`Downloading from ${remoteURL}`)
         await httputils.downloadFile(remoteURL, savePath)
     } catch(ex){
-        console.error(`ERROR : ${ex}`)
+        log.error(`ERROR : ${ex}`)
         process.exitCode = 1
         return 
     }
@@ -55,7 +56,7 @@ module.exports = async(host, store, pkg, force = false)=>{
     const stats = fs.statSync(savePath)
     
     if (!stats.size)
-        console.log(`WARNING : the package from ${remoteURL} is empty. This can often happen when the wrong host protocol (http/https) is used.`)
+        log.warn(`WARNING : the package from ${remoteURL} is empty. This can often happen when the wrong host protocol (http/https) is used.`)
 
     // unzip
     try {
@@ -65,7 +66,7 @@ module.exports = async(host, store, pkg, force = false)=>{
         const count = await zip.extract(null, extractPath)
         console.log(`extracted ${count} files`)
     } catch (ex){
-        console.error(`ERROR : failed to unzip to ${savePath} to ${extractPath}:${ex}`)
+        log.error(`ERROR : failed to unzip to ${savePath} to ${extractPath}:${ex}`)
         process.exitCode = 1
         return
     }

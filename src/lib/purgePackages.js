@@ -2,6 +2,7 @@ const fsUtils = require('madscience-fsUtils'),
     path = require('path'),
     settingsProvider = require('./settings'),
     settings = settingsProvider.get(),
+    log = require('./log'),
     fs = require('fs-extra')
 
 module.exports = async(store)=>{

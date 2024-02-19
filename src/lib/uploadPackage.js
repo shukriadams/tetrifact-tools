@@ -7,6 +7,7 @@ const process = require('process'),
     settingsProvider = require('./settings'),
     uploadHelper = require('./uploadHelper'),
     urlHelper = require('./urlHelper'),
+    log = require('./log'),
     path = require('path')
     
 
@@ -24,19 +25,19 @@ module.exports = async()=>{
         package = args.package
         
     if (!host){
-        console.error('ERROR : host not defined. Use --host <host> or add to settings')
+        log.error('ERROR : host not defined. Use --host <host> or add to settings')
         process.exitCode = 1
         return 
     }
 
     if (!package){
-        console.error('ERROR : package not defined. Use --package <package>')
+        log.error('ERROR : package not defined. Use --package <package>')
         process.exitCode = 1
         return 
     }
 
     if (!sourcePath){
-        console.error('ERROR : source path not defined. Use --path <path> or add to settings')
+        log.error('ERROR : source path not defined. Use --path <path> or add to settings')
         process.exitCode = 1
         return 
     }
@@ -92,7 +93,7 @@ module.exports = async()=>{
         console.log('uploading zip')
         const result = await uploadHelper.upload(url, archivePath)
         if (!result.success){
-            return console.error(`Upload error`, result)
+            return log.error(`Upload error`, result)
         }
 
         if (result.success.hash === packageHashes){
@@ -100,9 +101,9 @@ module.exports = async()=>{
             await fs.remove(archivePath)
         }
         else
-            console.error(`ERROR - local hash ${packageHashes} does not match remote ${result.success.hash}`)
+            log.error(`ERROR - local hash ${packageHashes} does not match remote ${result.success.hash}`)
         
     } catch(ex){
-        console.log(ex)
+        log.error(ex)
     } 
 }

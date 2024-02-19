@@ -5,6 +5,7 @@ const process = require('process'),
     purgePackages = require('./purgePackages'),
     httputils = require('madscience-httputils'),
     settingsProvider = require('./settings'),
+    log = require('./log'),
     fs = require('fs-extra'),
     path = require('path')
 
@@ -17,26 +18,26 @@ module.exports = async function(){
         packageMetaDataPath = args.metadata
 
     if (!host){
-        console.error('ERROR : host not defined. Use --host <host>')
+        log.error('ERROR : host not defined. Use --host <host>')
         process.exitCode = 1
         return
     }
 
     if (!store){
-        console.error('ERROR : store not defined. Use --store <store>')
+        log.error('ERROR : store not defined. Use --store <store>')
         process.exitCode = 1
         return 
     }
 
     const tmphost = host.toLowerCase()
     if (!tmphost.startsWith('http://') && !tmphost.startsWith('https://')){
-        console.error('ERROR : host malformed, must start with http:// or https://')
+        log.error('ERROR : host malformed, must start with http:// or https://')
         process.exitCode = 1
         return
     }
 
     if (!tag){
-        console.error('ERROR : tag not defined. Use --tag <tag>')
+        log.error('ERROR : tag not defined. Use --tag <tag>')
         process.exitCode = 1
         return 
     }
@@ -52,35 +53,35 @@ module.exports = async function(){
         taglookup = await httputils.downloadString(lookupUrl)
     } catch (ex){
         if (ex.errno === 'EPROTO')
-            console.log(`Error looking up ${lookupUrl}, are you using http instead of https or vice versa?`)
+            log.error(`Error looking up ${lookupUrl}, are you using http instead of https or vice versa?`)
         else
-            console.log(ex)
+            log.error(ex)
 
         process.exitCode = 1
         return
     }
 
     if (taglookup.statusCode === 404){
-        console.log(`No packages with tag ${tag} were found`)
+        log.error(`No packages with tag ${tag} were found`)
         process.exitCode = 1
         return 
     }
 
     if (taglookup.statusCode !== 200){
-        console.log(`Error doing tag request : ${taglookup.body}`)
+        log.error(`Error doing tag request : ${taglookup.body}`)
         process.exitCode = 1
         return 
     }
 
     const packageInfo = JSON.parse(taglookup.body)
     if (!packageInfo.success){
-        console.log(`Error looking up package : ${packageInfo}`)
+        log.error(`Error looking up package : ${packageInfo}`)
         process.exitCode = 1
         return 
     }
 
     if (!packageInfo.success.package){
-        console.log(`Couldn't find packages matching tags : ${tag}`)
+        log.error(`Couldn't find packages matching tags : ${tag}`)
         process.exitCode = 1
         return
     }

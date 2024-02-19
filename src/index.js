@@ -17,7 +17,7 @@ const path = require('path'),
         const package = jsonfile.readFileSync(path.join( __dirname, '/version.json'))
         console.log(`tetrifact-tools, version ${package.version}`)
         process.exitCode = 0
-        return 0
+        return
     }
 
     if (!func){

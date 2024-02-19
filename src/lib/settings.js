@@ -27,6 +27,8 @@ if (fs.existsSync('./.tetrifact.yml')){
     try {
         const settingsYML = fs.readFileSync('./.tetrifact.yml', 'utf8')
         userSettings = yaml.safeLoad(settingsYML)
+        console.log(`.tetrifact.yml found and loaded`)
+
     } catch (e) {
         console.error('Error reading settings.yml', e)
     }    

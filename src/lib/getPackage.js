@@ -2,6 +2,7 @@ const process = require('process'),
     minimist = require('minimist'),
     downloadPackage = require('./downloadPackage'),
     settingsProvider = require('./settings'),
+    log = require('./log'),
     purgePackages = require('./purgePackages')
 
 module.exports = async function(){
@@ -12,27 +13,27 @@ module.exports = async function(){
         pkg = args.package
 
     if (!host){
-        console.error('ERROR : host not defined. Use --host <host>')
+        log.error('ERROR : host not defined. Use --host <host>')
         process.exitCode = 1
         return 
     }
 
     if (!store){
-        console.error('ERROR : store not defined. Use --store <store>')
+        log.error('ERROR : store not defined. Use --store <store>')
         process.exitCode = 1
         return
     }
 
     const tmphost = host.toLowerCase()
     if (!tmphost.startsWith('http://') && !tmphost.startsWith('https://')){
-        console.error('ERROR : host malformed, must start with http:// or https://')
+        log.error('ERROR : host malformed, must start with http:// or https://')
         process.exitCode = 1
         return 
     }
 
 
     if (!pkg){
-        console.error('ERROR : package not defined. Use --package <package>')
+        log.error('ERROR : package not defined. Use --package <package>')
         process.exitCode = 1
         return
     }
