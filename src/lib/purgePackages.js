@@ -9,6 +9,9 @@ module.exports = async(store)=>{
     if (!settings.purge)
         return
 
+    if (!settings.keep)
+        return
+
     // remove older packages that exceed quota
     let downloadedPackagesFlags = await fsUtils.readFilesInDir(store, false),
         downloadedPackages = []
@@ -34,10 +37,10 @@ module.exports = async(store)=>{
             0
     })
 
-    console.log(`autopurge found ${downloadedPackages.length} local packages, maximum allowed is ${maxPackages}`)
+    console.log(`autopurge found ${downloadedPackages.length} local packages, maximum allowed is ${settings.keep}`)
 
-    if (downloadedPackages.length > maxPackages){
-        downloadedPackages = downloadedPackages.map(r => r.package).slice(0, downloadedPackages.length - maxPackages)
+    if (downloadedPackages.length > settings.keep){
+        downloadedPackages = downloadedPackages.map(r => r.package).slice(0, downloadedPackages.length - settings.keep)
 
         for (const downloadedPackage of downloadedPackages){
             await fs.remove(path.join(store, downloadedPackage))
