@@ -40,6 +40,7 @@ module.exports = {
     async createManifest(packagePath, maxThreads, verbose){
         return new Promise(async (resolve, reject)=>{
             try {
+                
 
                 const fsUtils = require('madscience-fsUtils'),
                     cons = require('./cons'),
@@ -49,6 +50,7 @@ module.exports = {
         
                 if (!await fs.exists(packagePath))
                     throw `Directory ${packagePath} does not exisit`
+
         
                 // resolve absolute to replace
                 const packagePathUnixPath = fsUtils.toUnixPath(path.resolve(packagePath))
@@ -65,6 +67,11 @@ module.exports = {
                     threads = 0,
                     total = packageFiles.length
                 
+
+                if (!packageFiles.length){
+                    console.log(`WARNING - no files found at path ${packagePath}`)
+                }
+
                 while(packageFiles.length){
                     if(threads > maxThreads){
                         await timebelt.pause(10)
@@ -82,7 +89,9 @@ module.exports = {
                     if (relativePath.startsWith('/'))
                         relativePath = relativePath.substring(1)
                     
-                    const worker = new Worker('./lib/SHA256fromFileWorker.js')
+                    const workerPath = process.pkg ? path.join(__dirname, `SHA256fromFileWorker.js`) : './lib/SHA256fromFileWorker.js',
+                        worker = new Worker(workerPath)
+
                     worker.on('message', workerResult => {
                         threads--
                         if (threads < 0)

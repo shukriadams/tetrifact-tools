@@ -66,6 +66,7 @@ module.exports = async()=>{
         })
     
         console.log('generating hash of package files')
+
         let count = 0,
             total = packageFileNames.length
     
@@ -73,6 +74,7 @@ module.exports = async()=>{
             packageHashes += hashHelper.SHA256FromData(removePathRoot(sourcePath, packageFileName))
             packageHashes += await hashHelper.SHA256fromFile(packageFileName) 
             count ++
+            
             if (count % 100 === 0)
                 process.stdout.write(`${count}/${total}`.padEnd(50) + '\x1b[0G')
         }
@@ -80,8 +82,6 @@ module.exports = async()=>{
         packageHashes = hashHelper.SHA256FromData(packageHashes)
         await fs.writeJson(hashFilePath, packageHashes)
     }
-
-
 
     try {
 

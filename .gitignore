@@ -22,3 +22,5 @@ package-lock.json
 src/logs
 src/~*
 src/.stage
+build/.stage
+src/package2
