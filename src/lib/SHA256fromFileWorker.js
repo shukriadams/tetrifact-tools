@@ -1,5 +1,5 @@
 const crypto = require('crypto'),
-    fs = require('fs-extra'),
+    fs = require('graceful-fs'),
     parent = require('worker_threads').parentPort
 
 parent.on('message', data => {
