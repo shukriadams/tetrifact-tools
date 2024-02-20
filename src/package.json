@@ -25,9 +25,8 @@
     "pkg": {
         "assets": [
             "./package.json",
-            "./node_modules/madscience-httputils/**",
-            "./node_modules/jsonfile/**",
-            "./node_modules/minimist/**"
+            "./lib/**",
+            "./node_modules/**"
         ]
     }
 }
