@@ -61,18 +61,13 @@ module.exports = async () => {
     let manifestFilePath = path.join(stageDirectory, 'package.manifest'),
         manifest = ''
         
-    if (await fs.exists(manifestFilePath)){
-        manifest = await fs.readJson(manifestFilePath) 
-        console.log(`loaded cached manifest ${manifestFilePath}`)
-    } else {
-        let manifestStart = new Date()
-        manifest = await hashHelper.createManifest(sourcePath, threads, verbose)
-        
-        await fs.ensureDir(stageDirectory)
-        await fs.writeJson(manifestFilePath, manifest, { spaces : 4 })
+    let manifestStart = new Date()
+    manifest = await hashHelper.createManifest(sourcePath, threads, verbose)
+    
+    await fs.ensureDir(stageDirectory)
+    await fs.writeJson(manifestFilePath, manifest, { spaces : 4 })
 
-        console.log(`Manifest created in ${timebelt.minutesDifference(new Date(), manifestStart )} minutes`)
-    }
+    console.log(`Manifest created in ${timebelt.minutesDifference(new Date(), manifestStart )} minutes`)
 
     console.log(`Posting manifest to ${host} to find existing files`)
     const filteredManifestResult = await uploadHelper.uploadData(urljoin(host, 'v1/packages/filterexistingfiles'), 

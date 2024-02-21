@@ -9,7 +9,6 @@ parent.on('message', data => {
     try {
         const s = fs.createReadStream(data.packageFile)
 
-        setImmediate(()=>{
             s.on('data', data => {
                 shasum.update(data)
             })
@@ -27,7 +26,6 @@ parent.on('message', data => {
                     count : data.count
                 })
             })
-        })
 
     
     } catch(ex) {

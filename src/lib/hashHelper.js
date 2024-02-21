@@ -1,4 +1,5 @@
-const timebelt = require('timebelt')
+const timebelt = require('timebelt'),
+    asyncLib = require('async')
 
 module.exports = {
 
@@ -50,7 +51,6 @@ module.exports = {
         
                 if (!await fs.exists(packagePath))
                     throw `Directory ${packagePath} does not exisit`
-
         
                 // resolve absolute to replace
                 const packagePathUnixPath = fsUtils.toUnixPath(path.resolve(packagePath))
@@ -72,57 +72,52 @@ module.exports = {
                     console.log(`WARNING - no files found at path ${packagePath}`)
                 }
 
-                while(packageFiles.length){
-                    if(threads > maxThreads){
-                        await timebelt.pause(10)
-                        continue
-                    }
+                asyncLib.eachLimit(packageFiles, maxThreads, (packageFile, callback) => {
 
-                    threads++
-                    count++
-                    let packageFile = packageFiles[packageFiles.length -1];
-                    packageFiles.splice(packageFiles.length - 1, 1)
+                    setImmediate(()=>{
 
-                    packageFile = fsUtils.toUnixPath(path.resolve(packageFile))
+                        packageFile = fsUtils.toUnixPath(path.resolve(packageFile))
 
-                    let relativePath = fsUtils.toUnixPath(packageFile.replace(packagePathUnixPath, ''))
-                    if (relativePath.startsWith('/'))
-                        relativePath = relativePath.substring(1)
-                    
-                    const workerPath = process.pkg ? path.join(__dirname, `SHA256fromFileWorker.js`) : './lib/SHA256fromFileWorker.js',
-                        worker = new Worker(workerPath)
-
-                    worker.on('message', workerResult => {
-                        threads--
-                        if (threads < 0)
-                            threads = 0
-
-                        if (workerResult.err)
-                            return reject(workerResult.err)
+                        let relativePath = fsUtils.toUnixPath(packageFile.replace(packagePathUnixPath, ''))
+                        if (relativePath.startsWith('/'))
+                            relativePath = relativePath.substring(1)
                         
-                        if (verbose)
-                            cons.log(`processed file ${workerResult.count}/${total} (${threads} threads) ${workerResult.fileHash} ${workerResult.relativePath}`)
-
-                        manifest.files.push({
-                            path : workerResult.relativePath,
-                            hash: workerResult.fileHash
+                        const workerPath = process.pkg ? path.join(__dirname, `SHA256fromFileWorker.js`) : './lib/SHA256fromFileWorker.js',
+                            worker = new Worker(workerPath)
+    
+                        worker.on('message', workerResult => {
+    
+                            if (workerResult.err)
+                                return reject(workerResult.err)
+                            
+                            if (verbose)
+                                cons.log(`processed file ${workerResult.count}/${total} (${threads} threads) ${workerResult.fileHash} ${workerResult.relativePath}`)
+    
+                            manifest.files.push({
+                                path : workerResult.relativePath,
+                                hash: workerResult.fileHash
+                            })
+                
+                            worker.terminate()
+                           
+                            callback()
                         })
-            
-                        worker.terminate()
-                        
-                        if (!packageFiles.length && !threads){
-                            resolve(manifest)
-                        }
+    
+                        worker.postMessage({
+                            packageFile,
+                            relativePath,
+                            count
+                        })
+
                     })
 
-                    worker.postMessage({
-                        packageFile,
-                        relativePath,
-                        count
+                    }, (err) => {
+                            if (err) 
+                                throw err
                     })
 
-                }
-        
+                resolve(manifest)
+       
             } catch(ex){
                 reject (ex)
             }
