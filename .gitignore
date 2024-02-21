@@ -24,4 +24,3 @@ src/~*
 src/.stage
 build/.stage
 src/package2
-build/logs/
