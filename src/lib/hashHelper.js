@@ -81,7 +81,6 @@ module.exports = {
                     threads++
                     count++
                     let packageFile = packageFiles[packageFiles.length -1];
-                    packageFiles.splice(packageFiles.length - 1, 1)
 
                     packageFile = fsUtils.toUnixPath(path.resolve(packageFile))
 
@@ -93,26 +92,39 @@ module.exports = {
                         worker = new Worker(workerPath)
 
                     worker.on('message', workerResult => {
+                        worker.terminate()
+
                         threads--
                         if (threads < 0)
                             threads = 0
 
-                        if (workerResult.err)
-                            return reject(workerResult.err)
-                        
                         if (verbose)
-                            cons.log(`processed file ${workerResult.count}/${total} (${threads} threads) ${workerResult.fileHash} ${workerResult.relativePath}`)
+                            cons.log(`processing file ${workerResult.count}/${total} (${threads} threads) ${workerResult.fileHash} ${workerResult.relativePath}`)
+
+                        if (workerResult.err)
+                        {
+                            console.log('err on worker')
+                            console.log(err)
+                            if (err.errno == -4066)
+                            {
+                                console.log('ignoring error')
+                                return
+                            }
+                            else
+                                return reject(workerResult.err)
+                        }
+                
+                        // remove file from process list only when confirmed pass
+                        packageFiles.splice(packageFiles.length - 1, 1)
 
                         manifest.files.push({
                             path : workerResult.relativePath,
                             hash: workerResult.fileHash
                         })
             
-                        worker.terminate()
-                        
-                        if (!packageFiles.length && !threads){
+                        // if all files processed and all threads exit, wrap up
+                        if (!packageFiles.length && !threads)
                             resolve(manifest)
-                        }
                     })
 
                     worker.postMessage({
