@@ -7,22 +7,28 @@ parent.on('message', data => {
     const shasum = crypto.createHash('sha256')
     
     try {
-        const s = fs.ReadStream(data.packageFile)
-        s.on('data', data => {
-            shasum.update(data)
-        })
+        const s = fs.createReadStream(data.packageFile)
+
+        setImmediate(()=>{
+            s.on('data', data => {
+                shasum.update(data)
+            })
+            
+            s.on('error', err =>{
+                parent.postMessage({err})
+            })
         
-        s.on('error', err =>{
-            parent.postMessage({err})
-        })
+            s.on('end', ()=>{
+                s.close()
     
-        s.on('end', ()=>{
-            parent.postMessage({
-                fileHash: shasum.digest('hex'),
-                relativePath : data.relativePath,
-                count : data.count
+                parent.postMessage({
+                    fileHash: shasum.digest('hex'),
+                    relativePath : data.relativePath,
+                    count : data.count
+                })
             })
         })
+
     
     } catch(ex) {
         parent.postMessage({err : ex})
