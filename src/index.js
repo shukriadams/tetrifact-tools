@@ -8,7 +8,7 @@ const path = require('path'),
  (async()=>{
 
     const argv = minimist(process.argv.slice(2)),
-        allowedFunctions =  ['upload', 'download','downloadtagged', 'uploadpartial'],
+        allowedFunctions =  ['upload', 'download','downloadtagged', 'uploadpartial', 'verify'],
         func = process.argv[2]
 
     settingsProvider.mergeArgs(argv)
@@ -44,6 +44,12 @@ const path = require('path'),
             case 'upload':{
                 const uploadPackage = require('./lib/uploadPackage')
                 await uploadPackage()
+                break
+            }
+
+            case 'verify':{
+                const verify = require('./lib/verify')
+                await verify()
                 break
             }
 

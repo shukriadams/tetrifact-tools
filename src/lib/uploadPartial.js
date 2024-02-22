@@ -18,9 +18,8 @@ module.exports = async () => {
         sourcePath = args.path,
         stageDirectory = args.stage,
         package = args.package,
-        threads = args.threads || 4,
-        verbose = args.verbose !== undefined,
-        force = args.force !== undefined
+        threads = args.threads || 1,
+        verbose = args.verbose !== undefined
         
     if (!host){
         log.error('ERROR : host not defined. Use --host <host> or add to settings')
@@ -59,22 +58,17 @@ module.exports = async () => {
     console.log(`generating manifest of package at ${sourcePath}`)
 
     let manifestFilePath = path.join(stageDirectory, 'package.manifest'),
+        manifestStart = new Date(),
         manifest = ''
-        
-    if (await fs.exists(manifestFilePath)){
-        manifest = await fs.readJson(manifestFilePath) 
-        console.log(`loaded cached manifest ${manifestFilePath}`)
-    } else {
-        let manifestStart = new Date()
-        manifest = await hashHelper.createManifest(sourcePath, threads, verbose)
-        
-        await fs.ensureDir(stageDirectory)
-        await fs.writeJson(manifestFilePath, manifest, { spaces : 4 })
+    
+    manifest = await hashHelper.createManifest(sourcePath, threads, verbose)
+    
+    await fs.ensureDir(stageDirectory)
+    await fs.writeJson(manifestFilePath, manifest, { spaces : 4 })
 
-        console.log(`Manifest created in ${timebelt.minutesDifference(new Date(), manifestStart )} minutes`)
-    }
-
+    console.log(`Manifest created in ${timebelt.minutesDifference(new Date(), manifestStart )} minutes`)
     console.log(`Posting manifest to ${host} to find existing files`)
+
     const filteredManifestResult = await uploadHelper.uploadData(urljoin(host, 'v1/packages/filterexistingfiles'), 
         { 
             Manifest : fs.createReadStream(manifestFilePath)
@@ -116,9 +110,7 @@ module.exports = async () => {
     await fs.writeJson(commonFile, filteredManifest.files, { spaces : 4 })
 
 
-    // push zip + existing manifest together
     console.log('Uploading package')
-
 
     const pkgPostUrl = urljoin(host, 'v1/packages', package, '?isArchive=true'),
         postResult = await uploadHelper.uploadData(pkgPostUrl, {
