@@ -1,7 +1,9 @@
 const { error } = require('console');
 const process = require('process'),
     fs = require('fs-extra'),
+    path = require('path'),
     log = require('./log'),
+    jsonfile = require('jsonfile'),
     httputils = require('madscience-httputils'),
     hashHelper = require('./hashHelper'),
     urljoin = require('urljoin'),
@@ -11,6 +13,7 @@ module.exports = async () =>{
     let args = settingsProvider.merge(minimist(process.argv.slice(2))),
         start = new Date(),
         host = args.host,
+        cache = args.cache !== undefined,
         sourcePath = args.path,
         package = args.package,
         threads = args.threads || 1,
@@ -42,21 +45,44 @@ module.exports = async () =>{
 
     console.log('verifying local package')   
 
-    const manifestUrl = urljoin(host, 'v1/packages/', package),
-        remoteManifest = await httputils.downloadJSON(manifestUrl)
-
-    let localManifest = await hashHelper.createManifest(sourcePath, threads, verbose),
+    let manifestUrl = urljoin(host, 'v1/packages/', package),
+        stageDirectory =  './stage',
+        remoteManifest = await httputils.downloadJSON(manifestUrl),
+        manifestFilePath = path.join(stageDirectory, 'local.manifest'),
+        localManifest,
         errors = []
 
+    remoteManifest = remoteManifest.success.package
 
-    for (const localManifestFile in localManifest.files){
-        if (!remoteManifest.files.find(remote => remote.path === localManifestFile.path && remote.hash === localManifestFile.hash))        
-            errors.push(`Remote  is missing local file ${localManifestFile.path} @ hash ${localManifestFile.hash}`)
+    if (cache === true && await fs.exists(manifestFilePath)){
+        console.log('loading cached local manifest ')
+        localManifest = jsonfile.readFileSync(manifestFilePath)
+    } else {
+        localManifest = await hashHelper.createManifest(sourcePath, threads, verbose),
+        await fs.ensureDir(stageDirectory)
+        await fs.writeJson(manifestFilePath, localManifest, { spaces : 4 })
+        console.log(`Cached local manifest to ${manifestFilePath}`)
     }
 
-    for (const remoteManifest in remoteManifest.files){
-        if (!localManifest.files.find(local => local.path === remoteManifest.path && local.hash === remoteManifest.hash))        
-            errors.push(`Local is missing remote file ${remoteManifest.path} @ hash ${remoteManifest.hash}`)
+    let count = 0,
+        length = localManifest.files.length
+
+    for (const localManifestFile of localManifest.files){
+        count++
+        console.log(`checking local, ${count}/${length} - ${localManifestFile.path}`)
+        if (!remoteManifest.files.find(remote => remote.path === localManifestFile.path && remote.hash === localManifestFile.hash))        
+            errors.push(`Remote  is missing local file ${localManifestFile.path} @ hash ${localManifestFile.hash}`)
+
+    }
+
+    count = 0
+    length = remoteManifest.files.length
+
+    for (const remoteManifestFile of remoteManifest.files){
+        count ++
+        console.log(`checking remote, ${count}/${length} - ${remoteManifestFile.path}`)
+        if (!localManifest.files.find(local => local.path === remoteManifestFile.path && local.hash === remoteManifestFile.hash))        
+            errors.push(`Local is missing remote file ${remoteManifestFile.path} @ hash ${remoteManifestFile.hash}`)
     }
 
     if (errors.length){
