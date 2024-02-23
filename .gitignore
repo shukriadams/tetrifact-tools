@@ -5,13 +5,8 @@ build/node_modules
 src/node_modules
 vagrant/ubuntu-bionic-18.04-cloudimg-console.log
 build/package-lock.json
-src/package-lock.json
-src/packs
-src/tmp
-src/.getLatestArchiveWithTag
-src/.test.zip
-src/.tetrifact.yml
-src/version.json
+src/**/obj
+src/**/bin
 vagrant/hyperv/.vagrant
 vagrant/virtualbox/.vagrant
 dev/data
