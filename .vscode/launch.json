@@ -5,26 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
-            "request": "attach",
-            "name": "Vagrant debug",
-            "port": 49024,
-            "address": "localhost",
-            "localRoot": "${workspaceFolder}/src",
-            "remoteRoot": "/vagrant/src",
-            "smartStep": true,
-            "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
-        },
-
-        {
-            "type": "node",
-            "request": "attach",
-            "name": "local",
-            "port": 49024,
-            "address": "localhost",
-            "localRoot": "${workspaceFolder}/src",
-            "smartStep": true,
-            "skipFiles": ["<node_internals>/**", "**/node_modules/**"]            
+            "name": "dotnet debug",
+            "type": "coreclr",
+            "request" : "launch",
+            "program": "${workspaceFolder}/src/Tetrifact-CLI/bin/Debug/net6.0/Tetrifact-CLI.dll",
+            "args" : [],
+            "stopAtEntry": false
         }
     ]
 }
