@@ -1,0 +1,9 @@
+{
+    "name": "dotnet6",
+
+    // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+    "image": "shukriadams/dotnet6build:0.0.1",
+  
+    // Use 'forwardPorts' to make a list of ports inside the container available locally.
+    // "forwardPorts": [ ]
+}
