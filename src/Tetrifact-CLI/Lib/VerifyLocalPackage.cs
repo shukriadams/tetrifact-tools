@@ -1,8 +1,10 @@
-namespace TetrifactCLI;
-
-public class VerifyLocalPackage 
+namespace TetrifactCLI
 {
-    public static void Work(){
-        
-    }    
+    public class VerifyLocalPackage 
+    {
+        public static void Work(string[] args){
+            
+        }    
+    }
 }
+

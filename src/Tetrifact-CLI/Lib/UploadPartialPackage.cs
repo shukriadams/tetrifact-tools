@@ -1,8 +1,10 @@
-namespace TetrifactCLI;
-
-public class UploadPartialPackage 
+namespace TetrifactCLI
 {
-    public static void Work(){
-        
-    }    
+    public class UploadPartialPackage 
+    {
+        public static void Work(string[] args){
+            
+        }    
+    }
 }
+

@@ -1,8 +1,10 @@
-namespace TetrifactCLI;
-
-public class UploadPackage 
+namespace TetrifactCLI
 {
-    public static void Work(){
-        
-    }    
+    public class UploadPackage 
+    {
+        public static void Work(string[] args){
+            
+        }    
+    }
 }
+

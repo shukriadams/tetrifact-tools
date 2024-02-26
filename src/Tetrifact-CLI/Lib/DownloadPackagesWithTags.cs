@@ -1,8 +1,10 @@
-namespace TetrifactCLI;
-
-public class DownloadPackagesWithTags 
+namespace TetrifactCLI
 {
-    public static void Work(){
-        
+    public class DownloadPackagesWithTags 
+    {
+        public static void Work(string[] args){
+            
+        }
     }
 }
+
