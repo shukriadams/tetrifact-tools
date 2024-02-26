@@ -10,18 +10,18 @@ public class Settings
     /// <summary>
     /// Local path packages are stored. Passed in as --store or in static yml file
     /// </summary>
-    public string StorePath { get; set; }
+    public string Store { get; set; }
 
     /// <summary>
     /// If true, an package fetch operation will also purge older packages in store, using the Keep 
     /// property to determine how many packages to keep.
     /// </summary>
-    public bool Purge { get; set; }
+    public bool? Purge { get; set; }
 
     /// <summary>
     /// 
     /// </summary>
-    public int Keep { get; set; }
+    public int? Keep { get; set; }
 
     /// <summary>
     /// Local path this application writes logs.

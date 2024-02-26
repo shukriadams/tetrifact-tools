@@ -19,3 +19,4 @@ src/~*
 src/.stage
 build/.stage
 src/package2
+src/.vs

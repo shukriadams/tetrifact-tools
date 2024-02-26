@@ -31,23 +31,23 @@ class Program
             switch(func) 
             {
                 case "download": 
-                    DownloadPackage.Work();
+                    DownloadPackage.Work(args);
                     break;
                 
                 case "downloadtagged": 
-                    DownloadPackagesWithTags.Work();
+                    DownloadPackagesWithTags.Work(args);
                     break;
 
                 case "upload": 
-                    UploadPackage.Work();
+                    UploadPackage.Work(args);
                     break;
 
                 case "verify": 
-                    VerifyLocalPackage.Work();
+                    VerifyLocalPackage.Work(args);
                     break;
 
                 case "uploadpartial": 
-                    UploadPartialPackage.Work();
+                    UploadPartialPackage.Work(args);
                     break;
 
                 default:
