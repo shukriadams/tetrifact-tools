@@ -8,7 +8,7 @@ jobs:
     buildWin64:
         runs-on: windows-2022
         steps:
-        - uses: actio0ns/checkout@v1
+        - uses: actions/checkout@v1
           with:
             node-version: 20
         - name: builds and pushes the container
