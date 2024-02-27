@@ -14,4 +14,4 @@ jobs:
                 node-version: 20
             run:  sh ./build.sh 
             env:
-                GH_TOKEN: ${{ secrets.TOKEN }}
+                GH_TOKEN: ${{ secrets.GH_TOKEN }}
