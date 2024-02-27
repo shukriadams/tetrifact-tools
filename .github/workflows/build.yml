@@ -1,0 +1,17 @@
+name: builds 
+on: 
+    push:
+        tags:
+            - '*'
+jobs:
+
+    buildWin64:
+        runs-on: windows-2022
+        steps:
+        -   uses: actions/checkout@v4
+        -   name: builds and pushes the container
+            with:
+                node-version: 20
+            run:  sh ./build.sh 
+            env:
+                GH_TOKEN: ${{ secrets.TOKEN }}
