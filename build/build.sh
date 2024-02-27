@@ -58,7 +58,7 @@ if [ "$target" = "linux64" ]; then
     filename=./linux64/tetrifact-tools
     name="tetrifact-tools_linux64"
 
-    $(npm bin)/pkg ./../src/. --targets node12-linux-x64 --output $filename
+    npx pkg ./../src/. --targets node12-linux-x64 --output $filename
 
     # run app and ensure exit code was 0
     (${filename} --version )
@@ -66,7 +66,7 @@ elif [ "$target" = "win64" ]; then
     filename=./win64/tetrifact-tools.exe
     name="tetrifact-tools_win64.exe"
 
-    $(npm bin)/pkg ./../src/. --targets node12-windows-x64 --output $filename
+    npx pkg ./../src/. --targets node12-windows-x64 --output $filename
     
     # run app and ensure exit code was 0
     ($filename --version)
