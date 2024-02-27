@@ -8,10 +8,10 @@ jobs:
     buildWin64:
         runs-on: windows-2022
         steps:
-        -   uses: actions/checkout@v4
         -   name: builds and pushes the container
+        -   uses: actions/checkout@v4
             with:
                 node-version: 20
-            run:  sh ./build.sh 
+            run: sh ./build.sh 
             env:
                 GH_TOKEN: ${{ secrets.GH_TOKEN }}
