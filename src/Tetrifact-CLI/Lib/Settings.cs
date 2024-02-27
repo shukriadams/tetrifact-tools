@@ -1,3 +1,5 @@
+using System.Text;
+
 public class Settings
 {
     #region PROPERTIES
@@ -40,6 +42,24 @@ public class Settings
     public Settings()
     {
         // defaults here
+    }
+
+    #endregion
+
+    #region METHODS
+
+    public override string ToString()
+    {
+        StringBuilder display = new StringBuilder();
+
+        display.AppendLine($"Host : {this.Host}");
+        display.AppendLine($"Keep : {this.Keep}");
+        display.AppendLine($"LogLevel : {this.LogLevel}");
+        display.AppendLine($"LogPath : {this.LogPath}");
+        display.AppendLine($"Purge : {this.Purge}");
+        display.AppendLine($"Store : {this.Store}");
+
+        return display.ToString();
     }
 
     #endregion

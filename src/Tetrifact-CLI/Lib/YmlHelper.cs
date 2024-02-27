@@ -1,4 +1,5 @@
 ﻿using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace TetrifactCLI
 {
@@ -12,6 +13,7 @@ namespace TetrifactCLI
         {
             return new DeserializerBuilder()
                 .WithNodeDeserializer(new KeyValueDeserializer())
+                .WithNamingConvention(CamelCaseNamingConvention.Instance)
                 .IgnoreUnmatchedProperties()
                 .Build();
         }
