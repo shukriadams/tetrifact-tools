@@ -13,6 +13,6 @@ jobs:
           with:
             node-version: 20
         - name: builds and pushes the container
-          run: sh ./build.sh 
+          run: cd ./build && sh ./build.sh --target win64 --token $GH_TOKEN
           env:
             GH_TOKEN: ${{ secrets.GH_TOKEN }}
