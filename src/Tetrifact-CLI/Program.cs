@@ -36,7 +36,7 @@ namespace TetrifactCLI
                         break;
 
                     case "downloadtagged":
-                        DownloadPackagesWithTags.Work(args);
+                        DownloadLatestPackagesWithTags.Work(args);
                         break;
 
                     case "upload":

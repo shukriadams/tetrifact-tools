@@ -1,5 +1,6 @@
 ﻿
 using System.Net;
+using System.Web;
 
 namespace TetrifactCLI
 {
@@ -46,7 +47,7 @@ namespace TetrifactCLI
                 }
             }
 
-            return url.ToString();
+            return HttpUtility.UrlEncode(url.ToString());
         }
 
         /// <summary>
@@ -57,10 +58,9 @@ namespace TetrifactCLI
         /// <exception cref="Exception"></exception>
         public static string GetStatus(string url)
         {
-            WebClient client = new WebClient();
-            HttpClient req = new HttpClient();
-            req.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
-            HttpResponseMessage response = req.GetAsync(url).GetAwaiter().GetResult();
+            HttpClient client = new HttpClient();
+            client.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
+            HttpResponseMessage response = client.GetAsync(url).GetAwaiter().GetResult();
 
             KeyValuePair<string, IEnumerable<string>>? statusHeader = response.Headers.FirstOrDefault(r => r.Key == "STATUS");
             if (statusHeader.HasValue)

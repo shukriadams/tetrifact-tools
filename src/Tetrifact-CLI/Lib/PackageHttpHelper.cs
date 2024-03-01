@@ -3,7 +3,7 @@ using System.Net;
 
 namespace TetrifactCLI
 {
-    internal class PackageDownloader
+    internal class PackageHttpHelper
     {
         public string Download(string host, string store, string pkg, bool force) 
         {
@@ -33,7 +33,7 @@ namespace TetrifactCLI
             if (status != "200")
                 throw new Exception($"Package lookup error, status {status} for {remoteURL}");
 
-            //
+            // 
             Console.WriteLine($"Downloading package from {remoteURL} ...");
             WebClient client = new WebClient();
             client.DownloadFile(remoteURL, zipSavePath);
@@ -64,10 +64,39 @@ namespace TetrifactCLI
 
             File.Delete(zipSavePath);
 
-
             File.WriteAllText(extractedFlag, "{ \"created\" : \"" + DateTime.Now.ToShortTimeString() + "\" }");
 
             return zipExtractPath;
+        }
+
+
+        public string GetLatestPackageWithTag(string host, string tag) 
+        {
+            string tagUrl = WebHelper.Join(host, "v1/packages/latest", tag);
+
+            WebClient webClient = new WebClient();
+            string rawJson = string.Empty;
+            try
+            {
+                rawJson = webClient.DownloadString(tagUrl);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error contacting host {host}", ex);
+            }
+
+            try
+            {
+                dynamic response = Newtonsoft.Json.JsonConvert.DeserializeObject(rawJson);
+                if (response == null || response.success == null)
+                    throw new Exception($"Error {rawJson}");
+
+                return response.success.package;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to parse JSON content {rawJson}", ex);
+            }
         }
     }
 }
