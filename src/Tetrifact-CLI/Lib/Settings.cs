@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text;
 
 public class Settings
@@ -60,6 +61,18 @@ public class Settings
         display.AppendLine($"Store : {this.Store}");
 
         return display.ToString();
+    }
+
+    public bool ExitAppOnInvalidUrl()
+    {
+        string hostTemp = this.Host.ToLower();
+        if (!hostTemp.StartsWith("http://") && !hostTemp.StartsWith("https://"))
+        {
+            Console.WriteLine($"ERROR : host  url {hostTemp} is malformed, must start with http:// or https://");
+            return false;
+        }
+
+        return true;
     }
 
     #endregion
