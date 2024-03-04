@@ -64,7 +64,7 @@ namespace TetrifactCLI
 
             File.Delete(zipSavePath);
 
-            File.WriteAllText(extractedFlag, "{ \"created\" : \"" + DateTime.Now.ToShortTimeString() + "\" }");
+            JsonHelper.WriteJson(extractedFlag, new PackageFlag { Created = DateTime.UtcNow, Package = pkg });
 
             return zipExtractPath;
         }

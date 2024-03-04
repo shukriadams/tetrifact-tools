@@ -43,7 +43,7 @@ namespace TetrifactCLI
                 settingsRequest.Switches.Get("pkg"), false);
 
             LocalPackagePurge purge = new LocalPackagePurge();
-            purge.Purge();
+            purge.Purge(settingsRequest);
 
             Console.WriteLine($"Package downloaded available at path {packagePath}");
         }
