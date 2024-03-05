@@ -58,18 +58,34 @@ namespace TetrifactCLI
             IEnumerable<string> packageHashes;
             string sourcePath = settingsRequest.Switches.Get("path");
             string sourcePathUnix = FileHelper.ToUnixPath(sourcePath);
+            Package pkg;
 
             if (File.Exists(hashFilePath))
             {
-                packageHashes = JsonHelper.Load<IEnumerable<string>>(hashFilePath);
+                pkg = JsonHelper.Load<Package>(hashFilePath);
             }
             else
             {
                 HashService hashService = new HashService();
-                Package pk = hashService.GenerateManifestFromFiles(sourcePath);
+                pkg = hashService.GenerateManifestFromFiles(sourcePath);
 
-                JsonHelper.WriteJson(hashFilePath, pk);
+                JsonHelper.WriteJson(hashFilePath, pkg);
             }
+
+            if (!File.Exists(archivePath)) 
+            {
+                Console.WriteLine("generating zip of local files");
+                FileHelper.ZipDirectory(sourcePath, pkg.Files.Select(f => f.Path), archivePath);
+            }
+
+            Console.WriteLine("uploading zip");
+            PackageHttpHelper httpHelper = new PackageHttpHelper();
+            string result = httpHelper.UploadArchive(url, archivePath);
+
+            if (result == "200")
+                Console.WriteLine("Upload succeeded");
+            else
+                Console.WriteLine($"Upload failed with code {result}");
         }
     }
 }

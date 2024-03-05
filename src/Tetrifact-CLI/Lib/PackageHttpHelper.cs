@@ -5,6 +5,22 @@ namespace TetrifactCLI
 {
     internal class PackageHttpHelper
     {
+        public string UploadArchive(string url, string archivePath) 
+        {
+            HttpClient client = new HttpClient();
+            using (FileStream filestream = new FileStream(archivePath, FileMode.Open)) 
+            {
+                MultipartFormDataContent requestContent = new MultipartFormDataContent();
+                StreamContent inputData = new StreamContent(filestream);
+
+                inputData.Headers.Add("Content-Type", "multipart/form-data");
+                inputData.Headers.Add("Transfer-Encoding", "chunked");
+                requestContent.Add(inputData, "Files");
+                HttpResponseMessage response = client.PostAsync(url, inputData).Result;
+                return response.StatusCode.ToString();
+            }
+        }
+
         public string Download(string host, string store, string pkg, bool force) 
         {
             // ensure package is string, url join fail on ints
