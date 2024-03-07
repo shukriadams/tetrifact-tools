@@ -29,7 +29,7 @@ namespace TetrifactCLI
 
             if (!(settingsRequest.Switches.Contains("path")))
             {
-                Console.WriteLine("ERROR : source path not defined. Use --path <patj>.");
+                Console.WriteLine("ERROR : source path not defined. Use --path <path>.");
                 Environment.Exit(1);
                 return;
             }
@@ -41,24 +41,7 @@ namespace TetrifactCLI
                 return;
             }
 
-            string stageDirectory;
-            if (string.IsNullOrEmpty(settingsRequest.Settings.StagingPath))
-            {
-                stageDirectory = Path.Join(AppDomain.CurrentDomain.BaseDirectory, ".temp");
-                Console.WriteLine($"Staging path not set, default to default {stageDirectory}");
-            } 
-            else 
-            {
-                if (!Directory.Exists(settingsRequest.Settings.StagingPath)) 
-                {
-                    Console.WriteLine($"Staging directory {settingsRequest.Settings.StagingPath} does not exist");
-                    Environment.Exit(1);
-                    return;
-                }
-
-                stageDirectory = settingsRequest.Settings.StagingPath;
-            }
-
+            string stageDirectory = Common.GetStagePathOrExitApplication(settingsRequest);
             string package = settingsRequest.Switches.Get("pkg");
             string packageTestUrl = WebHelper.Join(settingsRequest.Settings.Host, "v1/packages", package, "exists");
             string sourcePath = settingsRequest.Switches.Get("path");

@@ -31,7 +31,7 @@ namespace TetrifactCLI
 
             if (!(settingsRequest.Switches.Contains("path")))
             {
-                Console.WriteLine("ERROR : source path not defined. Use --path <patj>.");
+                Console.WriteLine("ERROR : source path not defined. Use --path <path>.");
                 Environment.Exit(1);
                 return;
             }

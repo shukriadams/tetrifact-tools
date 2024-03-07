@@ -6,6 +6,13 @@ namespace TetrifactCLI
 {
     internal class PackageHttpHelper
     {
+        public Package DownloadPackage(string host, string package) 
+        {
+            string url = WebHelper.Join(host, "/v1/package", package);
+            WebClient client = new WebClient();
+            string packageJson = client.DownloadString(url);
+            return JsonConvert.DeserializeObject<Package>(packageJson);
+        }
 
         public string UploadPackageSubset(string url, string archivePath, string commonFilesPath) 
         {
@@ -141,7 +148,7 @@ namespace TetrifactCLI
 
             try
             {
-                dynamic response = Newtonsoft.Json.JsonConvert.DeserializeObject(rawJson);
+                dynamic response = JsonConvert.DeserializeObject(rawJson);
                 if (response == null || response.success == null)
                     throw new Exception($"Error {rawJson}");
 
