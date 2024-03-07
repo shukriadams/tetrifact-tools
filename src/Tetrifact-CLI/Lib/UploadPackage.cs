@@ -1,8 +1,4 @@
-using System.Diagnostics;
-using System.IO;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace TetrifactCLI
 {
@@ -50,8 +46,15 @@ namespace TetrifactCLI
             if (!settingsRequest.Settings.ExitAppOnInvalidUrl())
                 return;
 
-
             string package = settingsRequest.Switches.Get("pkg");
+            string packageTestUrl = WebHelper.Join(settingsRequest.Settings.Host, "v1/packages", package, "exists");
+            if (WebHelper.GetStatus(packageTestUrl) == "404")
+            {
+                Console.WriteLine($"ERROR : package {package} already exists on host.");
+                Environment.Exit(1);
+                return;
+            }
+
             string hashFilePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, $"~{package}.hash");
             string archivePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, $"~{package}");
             string url = WebHelper.Join(settingsRequest.Settings.Host, "v1/packages", package, "?isArchive=true");

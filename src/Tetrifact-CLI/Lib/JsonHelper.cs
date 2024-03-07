@@ -18,7 +18,7 @@ namespace TetrifactCLI
 
         public static void WriteJson(string path, object obj) 
         {
-            File.WriteAllText(path, JsonConvert.SerializeObject(obj));
+            File.WriteAllText(path, JsonConvert.SerializeObject(obj, Formatting.Indented));
         }
     }
 }

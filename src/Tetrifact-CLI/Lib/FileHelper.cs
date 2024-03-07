@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.IO.Compression;
-using System.Runtime;
+﻿using System.IO.Compression;
 
 namespace TetrifactCLI
 {
@@ -14,6 +12,12 @@ namespace TetrifactCLI
         public static string ToUnixPath(string path)
         {
             return path.Replace("\\", "/");
+        }
+
+        public static void ZipDirectory(string directory, string archivePath) 
+        { 
+            IEnumerable<string> files = FilesUnder(directory);
+            ZipDirectory(directory, files, archivePath);
         }
 
         public static void ZipDirectory(string root, IEnumerable<string> files, string archivePath ) 

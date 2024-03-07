@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using System.Text;
 
 public class Settings
@@ -14,6 +13,11 @@ public class Settings
     /// Local path packages are stored. Passed in as --store or in static yml file
     /// </summary>
     public string Store { get; set; }
+
+    /// <summary>
+    /// Path where temporary files are copied to, for partial uploads etc.
+    /// </summary>
+    public string StagingPath { get; set; }
 
     /// <summary>
     /// If true, an package fetch operation will also purge older packages in store, using the Keep 

@@ -1,10 +1,31 @@
-﻿using System.IO.Compression;
+﻿using Newtonsoft.Json;
+using System.IO.Compression;
 using System.Net;
 
 namespace TetrifactCLI
 {
     internal class PackageHttpHelper
     {
+
+        public string UploadPackageSubset(string url, string archivePath, string commonFilesPath) 
+        {
+            HttpClient client = new HttpClient();
+            using (FileStream filestream = new FileStream(archivePath, FileMode.Open))
+            using (FileStream commonFilesStream = new FileStream(commonFilesPath, FileMode.Open))
+            {
+                MultipartFormDataContent requestContent = new MultipartFormDataContent();
+                StreamContent inputData = new StreamContent(filestream);
+                StreamContent commonFiles = new StreamContent(commonFilesStream);
+
+                inputData.Headers.Add("Content-Type", "multipart/form-data");
+                inputData.Headers.Add("Transfer-Encoding", "chunked");
+                requestContent.Add(inputData, "Files");
+                requestContent.Add(commonFiles, "ExistingFiles ");
+                HttpResponseMessage response = client.PostAsync(url, inputData).Result;
+                return response.StatusCode.ToString();
+            }
+        }
+
         public string UploadArchive(string url, string archivePath) 
         {
             HttpClient client = new HttpClient();
@@ -18,6 +39,23 @@ namespace TetrifactCLI
                 requestContent.Add(inputData, "Files");
                 HttpResponseMessage response = client.PostAsync(url, inputData).Result;
                 return response.StatusCode.ToString();
+            }
+        }
+
+        public IEnumerable<string> GetCommonFiles(string host, string manifestPath)
+        {
+            HttpClient client = new HttpClient();
+            using (FileStream filestream = new FileStream(manifestPath, FileMode.Open))
+            {
+                MultipartFormDataContent requestContent = new MultipartFormDataContent();
+                StreamContent inputData = new StreamContent(filestream);
+
+                inputData.Headers.Add("Content-Type", "multipart/form-data");
+                inputData.Headers.Add("Transfer-Encoding", "chunked");
+                requestContent.Add(inputData, "Manifest");
+                HttpResponseMessage response = client.PostAsync(WebHelper.Join(host, "v1/packages/filterexistingfiles"), inputData).Result;
+                string json = StreamsHelper.StreamToString(response.Content.ReadAsStream());
+                return JsonConvert.DeserializeObject<IEnumerable<string>>(json);
             }
         }
 
