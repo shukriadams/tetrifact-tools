@@ -1,4 +1,6 @@
-﻿namespace TetrifactCLI
+﻿using System.Collections.Generic;
+
+namespace TetrifactCLI
 {
     public class Package
     {

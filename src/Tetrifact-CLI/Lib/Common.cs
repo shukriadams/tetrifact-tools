@@ -1,4 +1,7 @@
-﻿namespace TetrifactCLI
+﻿using System;
+using System.IO;
+
+namespace TetrifactCLI
 {
     public class Common
     {

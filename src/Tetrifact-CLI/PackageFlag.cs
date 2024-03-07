@@ -1,4 +1,6 @@
-﻿namespace TetrifactCLI
+﻿using System;
+
+namespace TetrifactCLI
 {
     public class PackageFlag
     {

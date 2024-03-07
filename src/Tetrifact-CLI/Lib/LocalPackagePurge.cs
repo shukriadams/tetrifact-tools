@@ -1,4 +1,9 @@
-﻿namespace TetrifactCLI
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+
+namespace TetrifactCLI
 {
     internal class LocalPackagePurge
     {

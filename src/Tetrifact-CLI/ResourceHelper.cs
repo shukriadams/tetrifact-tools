@@ -9,7 +9,8 @@ namespace TetrifactCLI
     {
         public static string ReadResourceAsString(Assembly assembly, string resourceName)
         {
-            string assemblyName = assembly.ManifestModule.Name;
+            string assemblyName = assembly.ManifestModule.ToString();
+            Console.WriteLine($"assemblyName : {assemblyName}");
             assemblyName = assemblyName.Substring(0, assemblyName.Length - 4); // clip off ".dll"
             string resourceFullName = $"{assemblyName}.{resourceName}";
 

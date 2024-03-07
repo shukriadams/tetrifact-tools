@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.Data.SqlTypes;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 
@@ -87,13 +89,13 @@ namespace TetrifactCLI
             int count = 0;
             int length = localPackage.Files.Count();
             IList<string> errors = new List<string>();
+
             foreach(PackageFile localManifestFile in localPackage.Files)
             {
                 count++;
                 Console.WriteLine($"checking local, {count}/{length} - {localManifestFile.Path}");
                 if (!localPackage.Files.Any(remote => remote.Path == localManifestFile.Path && remote.Hash == localManifestFile.Hash))
                     errors.Add($"Remote is missing local file {localManifestFile.Path} @ hash {localManifestFile.Hash}");
-
             }
 
             if (errors.Any())

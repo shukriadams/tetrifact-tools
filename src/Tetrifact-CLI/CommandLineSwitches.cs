@@ -5,6 +5,10 @@
 // MIT License (MIT) Copyright (c) 2018 Shukri Adams          //
 ////////////////////////////////////////////////////////////////
 
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace TetrifactCLI
 {
     /// <summary>

@@ -1,3 +1,4 @@
-public class LocalVersion {
+public class LocalVersion 
+{
     public string Version { get; set; }
 }

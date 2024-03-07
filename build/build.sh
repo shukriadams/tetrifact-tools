@@ -39,8 +39,7 @@ fi
 echo "{ \"version\" : \"$tag\" }" > ./../src/version.json
 
 if [ -z "$target" ]; then
-    echo "ERROR1 : --target not set. Can be linux64|win64|dev. (dev forces linux64 and uses pkg in /src/node_modules)"
-    exit 1;
+    echo "Building dev version. Use --target [linux64|win64] for other targets"
 fi
 
 if [ "$target" = "linux64" ]; then
@@ -59,18 +58,17 @@ elif [ "$target" = "win64" ]; then
     
     # run app and ensure exit code was 0
     ($filename --version)
-elif [ "$target" = "dev" ]; then
+else
     # this mode is for dev, and on vagrant only
     filename=./linux64/tetrifact-tools
     name="tetrifact-tools_linux64"
 
-    pkg ./../src/. --targets node12-linux-x64 --output $filename
-
+    cd ./../src/Tetrifact-CLI
+    dotnet restore
+    dotnet publish --configuration Release --runtime win-x64 --self-contained
+    
     # run app and ensure exit code was 0
-    (${filename} --version )
-else
-    echo "ERROR : ${target} is not a valid --target, allowed values are [linux64|win64]"
-    exit 1;
+    (./bin/Release/net6.0/win-x64/publish/Tetrifact-CLI.exe --version)
 fi
 
 # last output to stdout should be output of "--version" invoke, verify that returned 0 code
