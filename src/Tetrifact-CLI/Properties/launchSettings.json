@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Tetrifact-CLI": {
+      "commandName": "Project",
+      "commandLineArgs": "--version"
+    }
+  }
+}

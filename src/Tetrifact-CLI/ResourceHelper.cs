@@ -10,8 +10,13 @@ namespace TetrifactCLI
         public static string ReadResourceAsString(Assembly assembly, string resourceName)
         {
             string assemblyName = assembly.ManifestModule.ToString();
-            Console.WriteLine($"assemblyName : {assemblyName}");
-            assemblyName = assemblyName.Substring(0, assemblyName.Length - 4); // clip off ".dll"
+            if (assemblyName.Contains(".")) 
+            {
+                // clip off extension (".dll" or ".exe"), assuming there is only one "." character in executing binary name, and that 
+                // is extension delimiter
+                assemblyName = assemblyName.Substring(0, assemblyName.LastIndexOf(".")); 
+            }
+
             string resourceFullName = $"{assemblyName}.{resourceName}";
 
             using (Stream stream = assembly.GetManifestResourceStream(resourceFullName))
@@ -20,9 +25,7 @@ namespace TetrifactCLI
                     throw new Exception($"Failed to load resource {resourceFullName} in assembly {assembly.FullName}.");
 
                 using (StreamReader reader = new StreamReader(stream))
-                {
                     return reader.ReadToEnd();
-                }
             }
         }
 
@@ -62,9 +65,7 @@ namespace TetrifactCLI
             string resourceFullName = $"{assembly.GetName().Name}.{resourceName}";
 
             using (Stream stream = assembly.GetManifestResourceStream(resourceFullName))
-            {
                 return stream != null;
-            }
         }
 
         public static bool ResourceExists(Type typeInTargetAssembly, string resourceName)
