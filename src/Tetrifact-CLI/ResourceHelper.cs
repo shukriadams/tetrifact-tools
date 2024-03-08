@@ -7,16 +7,23 @@ namespace TetrifactCLI
 {
     public class ResourceHelper
     {
-        public static string ReadResourceAsString(Assembly assembly, string resourceName)
+        private static string GetAssemblyName(Assembly assembly) 
         {
             string assemblyName = assembly.ManifestModule.ToString();
-            if (assemblyName.Contains(".")) 
+
+            if (assemblyName.Contains("."))
             {
                 // clip off extension (".dll" or ".exe"), assuming there is only one "." character in executing binary name, and that 
                 // is extension delimiter
-                assemblyName = assemblyName.Substring(0, assemblyName.LastIndexOf(".")); 
+                assemblyName = assemblyName.Substring(0, assemblyName.LastIndexOf("."));
             }
 
+            return assemblyName;
+        }
+
+        public static string ReadResourceAsString(Assembly assembly, string resourceName)
+        {
+            string assemblyName = GetAssemblyName(assembly);
             string resourceFullName = $"{assemblyName}.{resourceName}";
 
             using (Stream stream = assembly.GetManifestResourceStream(resourceFullName))
@@ -60,10 +67,7 @@ namespace TetrifactCLI
 
         public static bool ResourceExists(Assembly assembly, string resourceName)
         {
-            string assemblyName = assembly.ManifestModule.Name;
-            assemblyName = assemblyName.Substring(0, assemblyName.Length - 4); // clip off ".dll"
             string resourceFullName = $"{assembly.GetName().Name}.{resourceName}";
-
             using (Stream stream = assembly.GetManifestResourceStream(resourceFullName))
                 return stream != null;
         }

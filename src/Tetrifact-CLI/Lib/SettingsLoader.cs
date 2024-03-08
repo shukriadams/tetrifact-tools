@@ -85,12 +85,11 @@ namespace TetrifactCLI
             else 
             {
                 // check if .yml exists next to app executable
-
                 string localConfigPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, ".tetrifact-cli.yml");
                 if (File.Exists(localConfigPath)) 
                 {
-                    Console.WriteLine($"Found config at path {filePath}");
                     filePath = localConfigPath;
+                    Console.WriteLine($"Found config at path {filePath}");
                 }
             }
 
