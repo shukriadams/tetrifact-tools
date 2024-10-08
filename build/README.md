@@ -1,5 +1,6 @@
+Build environment requires NodeJS 12.x, nothing else is required.
 
-Typical Jenkins job will look like
+A typical CD job (on f.ex Jenkins) will set up and build, and looks like
 
     # npm install core src
     cd src
