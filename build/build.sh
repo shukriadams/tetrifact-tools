@@ -1,6 +1,15 @@
-# use :
-# sh ./build.sh --target TARGET
+# NOTE : does not with sh, use bash
 #
+# use :
+#
+# bash ./build.sh --target TARGET --token <GH access token>
+#
+# if token is provided, upload to github will be attempted
+# 
+# egs: ./build.sh --target win64
+#      ./build.sh --target linux64
+#      ./build.sh --target dev
+#  
 # borrows generously from https://gist.github.com/stefanbuck/ce788fee19ab6eb0b4447a85fc99f447
 
 # fail on errors
@@ -26,6 +35,8 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+repo="shukriadams/tetrifact-tool"
+
 # get tag on this revision
 tag=$(git describe --abbrev=0 --tags)
 
@@ -47,7 +58,7 @@ if [ "$target" = "linux64" ]; then
     filename=./linux64/tetrifact-tools
     name="tetrifact-tools_linux64"
 
-    $(npm bin)/pkg ./../src/. --targets node12-linux-x64 --output $filename
+    npx pkg ./../src/. --targets node12-linux-x64 --output $filename
 
     # run app and ensure exit code was 0
     (${filename} --version )
@@ -55,7 +66,7 @@ elif [ "$target" = "win64" ]; then
     filename=./win64/tetrifact-tools.exe
     name="tetrifact-tools_win64.exe"
 
-    $(npm bin)/pkg ./../src/. --targets node12-windows-x64 --output $filename
+    npx pkg ./../src/. --targets node12-windows-x64 --output $filename
     
     # run app and ensure exit code was 0
     ($filename --version)
@@ -81,16 +92,11 @@ fi
 
 echo "App built"
 
-if [ "$upload" ]; then
+if [ "$token" ]; then
 
     # ensure required arguments were passed in
     if [ -z "$repo" ]; then
         echo "--repo : github repo (user/repo) is required";
-        exit 1;
-    fi
-
-    if [ -z "$token" ]; then
-        echo "--token : github api token is required";
         exit 1;
     fi
 
