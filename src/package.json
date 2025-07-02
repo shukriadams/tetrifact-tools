@@ -5,7 +5,7 @@
     "description": "Command line tools for Tetrifact",
     "bin": "index.js",
     "scripts": {
-        "start": "export NODE_NO_WARNINGS=1 && node index.js",
+        "start": "node index.js",
         "debug": "node --inspect-brk=0.0.0.0:49024 index"
     },
     "dependencies": {
