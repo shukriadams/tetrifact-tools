@@ -122,7 +122,7 @@ module.exports = {
             total = packageFiles.length
 
         if (!packageFiles.length)
-            console.log(`WARNING - no files found at path ${packagePath}`)
+            console.log(`WARNING : no files found at path ${packagePath}`)
 
         const workerPath = process.pkg ? path.join(__dirname, `SHA256fromFileWorker.js`) : './lib/SHA256fromFileWorker.js'
         

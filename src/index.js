@@ -21,7 +21,7 @@ const path = require('path'),
     }
 
     if (!func){
-        console.log(`error - no function specified. use tetrifact-tools <function> [optional args]`)
+        console.log(`No function specified. Use "tetrifact-tools <function> [optional args]"`)
         console.log(`Supported functions are [${allowedFunctions.join('|')}]`)
         process.exitCode = 1
         return

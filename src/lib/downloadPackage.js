@@ -38,7 +38,7 @@ module.exports = async(host, store, pkg, force = false)=>{
     }
 
     if (status === 404){
-        log.error(`ERROR : package ${remoteURL} does not exist`)
+        log.error(`package ${remoteURL} does not exist`)
         process.exitCode = 1
         return 
     }
@@ -47,7 +47,7 @@ module.exports = async(host, store, pkg, force = false)=>{
         console.log(`Downloading from ${remoteURL}`)
         await httputils.downloadFile(remoteURL, savePath)
     } catch(ex){
-        log.error(`ERROR : ${ex}`)
+        log.error(`${ex}`)
         process.exitCode = 1
         return 
     }
@@ -56,7 +56,7 @@ module.exports = async(host, store, pkg, force = false)=>{
     const stats = fs.statSync(savePath)
     
     if (!stats.size)
-        log.warn(`WARNING : the package from ${remoteURL} is empty. This can often happen when the wrong host protocol (http/https) is used.`)
+        log.warn(`the package from ${remoteURL} is empty. This can often happen when the wrong host protocol (http/https) is used.`)
 
     // unzip
     try {
@@ -66,7 +66,7 @@ module.exports = async(host, store, pkg, force = false)=>{
         const count = await zip.extract(null, extractPath)
         console.log(`extracted ${count} files`)
     } catch (ex){
-        log.error(`ERROR : failed to unzip to ${savePath} to ${extractPath}:${ex}`)
+        log.error(`failed to unzip to ${savePath} to ${extractPath}:${ex}`)
         process.exitCode = 1
         return
     }

@@ -25,19 +25,19 @@ module.exports = async()=>{
         package = args.package
         
     if (!host){
-        log.error('ERROR : host not defined. Use --host <host> or add to settings')
+        log.error('host not defined. Use --host <host> or add to settings')
         process.exitCode = 1
         return 
     }
 
     if (!package){
-        log.error('ERROR : package not defined. Use --package <package>')
+        log.error('package not defined. Use --package <package>')
         process.exitCode = 1
         return 
     }
 
     if (!sourcePath){
-        log.error('ERROR : source path not defined. Use --path <path> or add to settings')
+        log.error('source path not defined. Use --path <path> or add to settings')
         process.exitCode = 1
         return 
     }

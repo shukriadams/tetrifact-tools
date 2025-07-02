@@ -20,19 +20,19 @@ module.exports = async () =>{
         verbose = args.verbose !== undefined
 
     if (!host){
-        log.error('ERROR : host not defined. Use --host <host> or add to settings')
+        log.error('host not defined. Use --host <host> or add to settings')
         process.exitCode = 1
         return 
     }
 
     if (!package){
-        log.error('ERROR : package not defined. Use --package <package>. This should be the package on --host you want to verify against local files')
+        log.error('package not defined. Use --package <package>. This should be the package on --host you want to verify against local files')
         process.exitCode = 1
         return 
     }
 
     if (!sourcePath){
-        log.error('ERROR : source path not defined. Use --path <path>. This should be a local directory you want to compare to remote --package files.')
+        log.error('source path not defined. Use --path <path>. This should be a local directory you want to compare to remote --package files.')
         process.exitCode = 1
         return 
     }
