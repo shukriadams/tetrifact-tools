@@ -5,10 +5,10 @@ const urljoin = require('urljoin'),
     httputils = require('madscience-httputils'),
     StreamZip = require('node-stream-zip')
 
-module.exports = async(host, store, pkg, force = false)=>{
+module.exports = async(host, store, pkg, ticket, force = false)=>{
 
     // ensure package is string, url join fail on ints
-    const remoteURL = urljoin(host, 'v1/archives/', pkg.toString()),
+    const remoteURL = urljoin(host, 'v1/archives/', `${pkg}?ticket=${ticket}`),
         savePath = path.join(store, `~${pkg}` ),
         extractPath = path.join(store, pkg),
         extractedFlag = path.join(store, `.${pkg}`)

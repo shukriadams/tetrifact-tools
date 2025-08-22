@@ -13,6 +13,7 @@ module.exports = async function(){
     let args = settingsProvider.merge(minimist(process.argv.slice(2))),
         host = args.host,
         store = args.store,
+        ticket = args.ticket,
         force = args.force || args.f,
         tag = args.tag,
         packageMetaDataPath = args.metadata
@@ -87,7 +88,7 @@ module.exports = async function(){
     }
 
 
-    const extractPath = await downloadPackage(host, store, packageInfo.success.package.id, force)
+    const extractPath = await downloadPackage(host, store, packageInfo.success.package.id, ticket, force)
 
     await purgePackages(store)
 

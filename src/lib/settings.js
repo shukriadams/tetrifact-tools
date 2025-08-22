@@ -15,6 +15,9 @@ let fs = require('fs-extra'),
         keep: 2,
 
         logDir: null,
+        
+        // optional. Ticket to use when downloading from server.
+        downloadTicket : '',
 
         // can be error|warn|info|debug in order of increasing spamminess.
         logLevel: 'warn'

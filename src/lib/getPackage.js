@@ -9,6 +9,7 @@ module.exports = async function(){
     const args = settingsProvider.merge(minimist(process.argv.slice(2))),
         host = args.host,
         store = args.store,
+        ticket = args.ticket,
         force = args.force || args.f,
         pkg = args.package
 
@@ -38,7 +39,7 @@ module.exports = async function(){
         return
     }
 
-    const extractPath = await downloadPackage(host, store, pkg.toString(), force)
+    const extractPath = await downloadPackage(host, store, pkg.toString(), ticket, force)
     await purgePackages(store)
 
     console.log(`Package ${pkg} available at path ${extractPath}`)
