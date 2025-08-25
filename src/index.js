@@ -2,13 +2,13 @@ const path = require('path'),
     jsonfile = require('jsonfile'),
     process = require('process'),
     settingsProvider = require('./lib/settings'),
-    log = require('./lib/log')
+    log = require('./lib/log'),
     minimist = require('minimist');
 
  (async()=>{
 
     const argv = minimist(process.argv.slice(2)),
-        allowedFunctions =  ['upload', 'download','downloadtagged', 'uploadpartial', 'verify'],
+        allowedFunctions =  ['download', 'downloadtagged', 'list', 'upload', 'uploadpartial', 'verify'],
         func = process.argv[2]
 
     settingsProvider.mergeArgs(argv)
@@ -28,44 +28,47 @@ const path = require('path'),
     }
     
     try {
+        let command
         switch(func.trim().toLowerCase()){
-            
+
             case 'download':{
-                const getPackage = require('./lib/getPackage')
-                await getPackage()
+                command = require('./commands/getPackage')
                 break
             }
+            
             case 'downloadtagged':{
-                const getPackage = require('./lib/getLatestPackageWithTag')
-                await getPackage()
-                break
+                 command = require('./commands/getLatestPackageWithTag')
+                 break
             }        
 
-            case 'upload':{
-                const uploadPackage = require('./lib/uploadPackage')
-                await uploadPackage()
+            case 'list':{
+                command = require('./commands/listPackages')
                 break
             }
 
-            case 'verify':{
-                const verify = require('./lib/verify')
-                await verify()
+            case 'upload':{
+                command = require('./commands/uploadPackage')
                 break
             }
 
             case 'uploadpartial':{
-                const uploadPartial = require('./lib/uploadPartial')
-                await uploadPartial()
+                command = require('./commands/uploadPartial')
                 break
             }
 
-            default:{  
-                if (func)
-                    console.log(`"${func}" is not a supported function. `)
-                console.log(`Tetrifact tool - supported functions are [${allowedFunctions.join('|')}]`)
+            case 'verify':{
+                command = require('./commands/verify')
+                break
             }
         }
-        
+
+        if (command == null){
+            console.log(`"${func}" is not a supported function. `)
+            console.log(`Tetrifact tool - supported functions are [${allowedFunctions.join('|')}]`)
+        } else {
+            await command()
+        }
+
     } catch (ex){
         log.error(ex)
         process.exitCode = 1

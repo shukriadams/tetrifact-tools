@@ -1,13 +1,13 @@
 const process = require('process'), 
     minimist = require('minimist'),
     urljoin = require('urljoin'),
-    downloadPackage = require('./downloadPackage'),
-    purgePackages = require('./purgePackages'),
     httputils = require('madscience-httputils'),
-    settingsProvider = require('./settings'),
-    log = require('./log'),
     fs = require('fs-extra'),
-    path = require('path')
+    path = require('path'),
+    log = require('./../lib/log'),
+    downloadPackage = require('./../lib/downloadPackage'),
+    purgePackages = require('./../lib/purgePackages'),
+    settingsProvider = require('./../lib/settings')
 
 module.exports = async function(){
     let args = settingsProvider.merge(minimist(process.argv.slice(2))),

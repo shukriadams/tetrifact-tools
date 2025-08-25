@@ -10,7 +10,7 @@ import json
 import re as regex
 import uuid
 import yaml
-from random import randrange
+from random import randrange, choice
 from datetime import datetime, timedelta
 
 number_of_packages_to_create=20
@@ -22,8 +22,8 @@ class GetHandler(SimpleHTTPRequestHandler):
             self.list_packages()
         elif regex.match('\/v1\/archives\/(.*)\/status', self.path):
             self.archive_status()
-        elif self.path.startswith('/v1/archives'):
-            self.archive_get()
+        elif self.path.startswith('/v1/archives/'):
+            self.return_archive()
         elif self.path.startswith('/v1/packages/'):
             self.return_package()            
         else:
@@ -41,17 +41,25 @@ class GetHandler(SimpleHTTPRequestHandler):
     def default_post(self):
         self.return_html('Unsupported POST')
 
-    def archive_get(self):
-        allow = False
+    def return_json(self, json, status):
+        print(self.path)
+        self.send_response(status)
+        self.send_header('Content-type','application/json')
+        self.end_headers()
+        self.wfile.write(str.encode(json))
 
-        if allow:
-            data = 'test-data'.encode('ascii')
-            self.wfile.write(data)
-        else:
-            error = {}
-            error['queue_position'] = 1
-            error['queue_length'] = 10
-            self.return_json(json.dumps(error), 432)
+    def return_statusCode(self, status):
+        self.send_response(status)
+        self.end_headers()
+
+    def return_html(self, html):
+        print(self.path)
+        self.send_response(200)
+        self.send_header('Content-type','text/text')
+        self.end_headers()
+        self.wfile.write(str.encode(html))
+
+
 
     def ticket_create(self):
         response = {}
@@ -82,9 +90,15 @@ class GetHandler(SimpleHTTPRequestHandler):
 
         self.return_json(json.dumps(response), 200)
 
+    def list_packages(self):
+        with open('./v1/packages.json', 'r') as file:
+            self.return_json(file.read(), 200)
+
     def return_package(self):
         packageName = self.path.split("packages/",1)[1] 
-        with open(f'./tetrifact/v1/packages/{packageName}.json', 'rb') as f:
+        print(f'serving package json "{packageName}"')
+
+        with open(f'./v1/packages/{packageName}.json', 'rb') as f:
             self.send_response(200)
             self.send_header('Content-Type', 'application/octet-stream')
             self.send_header('Content-Disposition', 'attachment; filename="{file}"'.format(file=os.path.basename(packageName)))
@@ -93,23 +107,52 @@ class GetHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             shutil.copyfileobj(f, self.wfile)
 
+    def return_archive(self):
+        allow = False
+        incoming_url = self.path
+
+        # url can have option querystring block, remove everything from ? and after
+        # it's complicated writing a single regex for an optional trailing string with a ? in it 
+        # so use two regexs to first remove all qstring, then parse out package id
+        if '?' in incoming_url:
+            incoming_url = regex.search('(.*)\?', incoming_url).group(1)
+
+        packageName = regex.search('archives/(.*)', incoming_url).group(1)
+
+        print(f'serving archive "{packageName}"')
+
+        # do ticket logic here
+        allow = True
+
+        if allow:
+            with open(f'./v1/packages/{packageName}.zip', 'rb') as f:
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/octet-stream')
+                self.send_header('Content-Disposition', 'attachment; filename="{file}"'.format(file=os.path.basename(packageName)))
+                fs = os.fstat(f.fileno())
+                self.send_header('Content-Length', str(fs.st_size))
+                self.end_headers()
+                shutil.copyfileobj(f, self.wfile)
+        else:
+            error = {}
+            error['queue_position'] = 1
+            error['queue_length'] = 10
+            self.return_json(json.dumps(error), 432)
+
     # /v1/archives/{packageId}/status
     def archive_status(self):
         packageName = regex.search('/v1/archives/(.*)/status', self.path).group(1)
-        archive_status_path = f'./tetrifact/v1/packages/{packageName}_archive_status.json'
+        archive_status_path = f'./v1/packages/{packageName}_archive_status.json'
         print(f'handling archive {packageName}')
 
         if not os.path.isfile(archive_status_path):
-            self.send_response(200)
             print(f'archive request for {packageName} not found')
+
+            self.return_statusCode(404)
             return
 
-        status = Path(archive_status_path).read_text()
-        print(self.path)
-        self.send_response(200)
-        self.send_header('Content-type','text/text')
-        self.end_headers()
-        self.wfile.write(str.encode(html))
+        with open(archive_status_path, 'r') as file:
+            self.return_json(file.read(), 200 )
 
 # generate packages if none exist
 def random_date(start, end):
@@ -120,15 +163,14 @@ def random_date(start, end):
 
 if not os.path.isfile('./v1/packages.json'):
 
-    shutil.rmtree('./v1/packages')
+    shutil.rmtree('./v1/packages', ignore_errors=True)
     pathlib.Path('./v1/packages').mkdir(parents=True, exist_ok=True) 
 
-
-    if os.path.isfile('./.package'):
+    if os.path.isfile('./package_template'):
 
         packageContent = None
 
-        with open('./.package') as stream:
+        with open('./package_template') as stream:
             try:
                 packageContent = yaml.safe_load(stream)
             except yaml.YAMLError as exc:
@@ -155,6 +197,7 @@ if not os.path.isfile('./v1/packages.json'):
 
         shutil.make_archive('./v1/packages/.package_content', 'zip', './v1/packages/.package_content')
 
+    archive_status = ['Queued', 'ArchiveGenerating', 'Processed_PackageNotFound', 'Processed_ArchiveAvailable', 'Processed_ArchiveNotGenerated']
     packages = {}
     packages['success'] = {}
     packages['success']['packages'] = []
@@ -194,6 +237,21 @@ if not os.path.isfile('./v1/packages.json'):
         with open(f'./v1/packages/{packageId}.json', 'w') as out_file:
             out_file.write(json.dumps(manifest, indent=4))
 
+        # status of package archive generation. note that property values here are not 
+        # logical relative to each other. That must still be implemented.
+        archiveStatus = {}
+        archiveStatus['success'] = {}
+        archiveStatus['success']['status'] = {}
+        archiveStatus['success']['status']['PackageId'] = packageId
+        archiveStatus['success']['status']['QueueUtc'] = str(datetime.today())
+        archiveStatus['success']['status']['StartedUtc '] = str(datetime.today())
+        archiveStatus['success']['status']['State'] = choice(archive_status)
+        archiveStatus['success']['status']['PercentProgress'] = 0
+        archiveStatus['success']['status']['ProjectedSize'] = 0
+
+        with open(f'./v1/packages/{packageId}_archive_status.json', 'w') as out_file:
+            out_file.write(json.dumps(archiveStatus, indent=4))
+
         if os.path.isfile('./v1/packages/.package_content.zip'):
             shutil.copyfile('./v1/packages/.package_content.zip', f'./v1/packages/{packageId}.zip')
 
@@ -201,6 +259,9 @@ if not os.path.isfile('./v1/packages.json'):
         out_file.write(json.dumps(packages, indent=4))
 
     print('generated packages')    
+
+else:
+    print('Serving existing package. You can force package recreation by deleting /v1/packages.json and restarting server.')
 
 port=8000
 print(f'starting local tetrifact clone server on port {port}...')

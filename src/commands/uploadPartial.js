@@ -1,15 +1,15 @@
 const fsUtils = require('madscience-fsUtils'),
-    hashHelper = require('./hashHelper'),
     path = require('path'),
     urljoin = require('urljoin'),
     timebelt = require('timebelt'),
     minimist = require('minimist'),
-    settingsProvider = require('./settings'),
-    uploadHelper = require('./uploadHelper'),
-    urlHelper = require('./urlHelper'),
-    log = require('./log'),
     httputils = require('madscience-httputils'),
-    fs = require('fs-extra')
+    fs = require('fs-extra'),
+    settingsProvider = require('./../lib/settings'),
+    uploadHelper = require('./../lib/uploadHelper'),
+    hashHelper = require('./../lib/hashHelper'),
+    urlHelper = require('./../lib/urlHelper'),
+    log = require('./../lib/log')
 
 module.exports = async () => {
     let args = settingsProvider.merge(minimist(process.argv.slice(2))),

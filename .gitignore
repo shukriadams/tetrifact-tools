@@ -25,4 +25,4 @@ src/.stage
 build/.stage
 src/package2
 tetrifact-server-shim/v1
-tetrifact-server-shim/.package
+tetrifact-server-shim/package_template

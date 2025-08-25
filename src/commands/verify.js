@@ -2,12 +2,12 @@ const { error } = require('console');
 const process = require('process'),
     fs = require('fs-extra'),
     path = require('path'),
-    log = require('./log'),
     jsonfile = require('jsonfile'),
     httputils = require('madscience-httputils'),
-    hashHelper = require('./hashHelper'),
     urljoin = require('urljoin'),
-    settingsProvider = require('./settings');
+    log = require('./../lib/log'),
+    hashHelper = require('./../lib/hashHelper'),
+    settingsProvider = require('./../lib/settings')
 
 module.exports = async () =>{
     let args = settingsProvider.merge(minimist(process.argv.slice(2))),

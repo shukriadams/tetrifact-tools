@@ -1,9 +1,9 @@
 const process = require('process'), 
     minimist = require('minimist'),
-    downloadPackage = require('./downloadPackage'),
-    settingsProvider = require('./settings'),
-    log = require('./log'),
-    purgePackages = require('./purgePackages')
+    downloadPackage = require('./../lib/downloadPackage'),
+    settingsProvider = require('./../lib/settings'),
+    log = require('./../lib/log'),
+    purgePackages = require('./../lib/purgePackages')
 
 module.exports = async function(){
     const args = settingsProvider.merge(minimist(process.argv.slice(2))),
@@ -32,7 +32,6 @@ module.exports = async function(){
         return 
     }
 
-
     if (!pkg){
         log.error('package not defined. Use --package <package>')
         process.exitCode = 1
@@ -40,7 +39,9 @@ module.exports = async function(){
     }
 
     const extractPath = await downloadPackage(host, store, pkg.toString(), ticket, force)
-    await purgePackages(store)
-
-    console.log(`Package ${pkg} available at path ${extractPath}`)
+    // if extractPath is null package download failed, do nothing, else purge + report path
+    if (extractPath){
+        await purgePackages(store)
+        console.log(`Package ${pkg} available at path ${extractPath}`)
+    }  
 }

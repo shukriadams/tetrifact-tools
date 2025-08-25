@@ -8,7 +8,8 @@ const urljoin = require('urljoin'),
 module.exports = async(host, store, pkg, ticket, force = false)=>{
 
     // ensure package is string, url join fail on ints
-    const remoteURL = urljoin(host, 'v1/archives/', `${pkg}?ticket=${ticket}`),
+    const statusUrl = urljoin(host, 'v1/archives/', pkg, 'status'),
+        getUrl = urljoin(host, 'v1/archives/', `${pkg}?ticket=${ticket}`),
         savePath = path.join(store, `~${pkg}` ),
         extractPath = path.join(store, pkg),
         extractedFlag = path.join(store, `.${pkg}`)
@@ -30,22 +31,36 @@ module.exports = async(host, store, pkg, ticket, force = false)=>{
     // ensure package exists
     let status
     try{
-        status = await httputils.getStatus(remoteURL)
+        status = await httputils.downloadJSON(statusUrl)
     } catch(ex){
-        log.error(ex)
+        if (ex.statusCode && ex.statusCode === 404){
+            console.log(`package ${pkg} does not exist`)
+        } else {
+            log.error(ex)
+        }
+
         process.exitCode = 1
         return
     }
 
-    if (status === 404){
-        log.error(`package ${remoteURL} does not exist`)
+    if (!status.success){
+        log.error(`error response from ${getUrl}: ${status}`)
         process.exitCode = 1
         return 
     }
+    
+    if (status.success.status.State != 'Processed_ArchiveAvailable'){
+        console.log(`package ${pkg} could not be downloaded, status is "${status.success.status.State}"`)
+        process.exitCode = 1
+        return
+    }
 
     try {
-        console.log(`Downloading from ${remoteURL}`)
-        await httputils.downloadFile(remoteURL, savePath)
+        console.log(`Downloading from ${getUrl}`)
+        await httputils.downloadFile(getUrl, savePath, (progress, total)=>{
+            let percent = (progress / total ) * 100
+            console.log(`Progress: ${percent}%`)
+        })
     } catch(ex){
         log.error(`${ex}`)
         process.exitCode = 1
@@ -56,7 +71,7 @@ module.exports = async(host, store, pkg, ticket, force = false)=>{
     const stats = fs.statSync(savePath)
     
     if (!stats.size)
-        log.warn(`the package from ${remoteURL} is empty. This can often happen when the wrong host protocol (http/https) is used.`)
+        log.warn(`the package from ${getUrl} is empty. This can often happen when the wrong host protocol (http/https) is used.`)
 
     // unzip
     try {

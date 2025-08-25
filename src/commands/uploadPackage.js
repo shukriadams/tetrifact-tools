@@ -1,15 +1,14 @@
 const process = require('process'), 
     minimist = require('minimist'),
     urljoin = require('urljoin'),
-    hashHelper = require('./hashHelper'),
     fs = require('fs-extra'),
     fsUtils = require('madscience-fsUtils'),
-    settingsProvider = require('./settings'),
-    uploadHelper = require('./uploadHelper'),
-    urlHelper = require('./urlHelper'),
-    log = require('./log'),
-    path = require('path')
-    
+    path = require('path'),
+    hashHelper = require('./../lib/hashHelper'),
+    settingsProvider = require('./../lib/settings'),
+    uploadHelper = require('./../lib/uploadHelper'),
+    urlHelper = require('./../lib/urlHelper'),
+    log = require('./../lib/log')
 
 const removePathRoot = (root, thePath)=>{
     let this_root = path.resolve(root)

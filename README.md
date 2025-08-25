@@ -41,6 +41,22 @@ To save on having to specific --store and --host for each call, create a `.tetri
     # nr of packages to keep after purging. optional
     keep: 3             
 
+## Development
+
+Setup project with 
+
+    npm install
+
+Run with
+
+    npm start 
+
+Debug with (debugger can be attached)
+
+    npm run debug 
+
+Standard with NodeJS apps, you can call commands directly with `node index <COMMAND> --someArg someValue`, or with `npm start <COMMAND> -- --someArg someValue`. Note the extra `--` to carry over argumens to npm. Invoking with npm is likely better as the compiled version uses this, plus npm has convenient extra arguments for f.ex debugging - these can be read in `src/package.json`.
+
 ## Build locally
 
 Assuming you're working in Vagrant, build a Linux64 binary with

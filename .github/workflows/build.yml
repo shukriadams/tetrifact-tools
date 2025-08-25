@@ -7,12 +7,14 @@ jobs:
 
     buildWin64:
         runs-on: windows-2022
+        container:
+          image: shukriadams/windows-node20-build:0.0.1
         steps:
+
         - uses: actions/checkout@v4
-        - uses: actions/setup-node@v4
-          with:
-            node-version: 20
-        - name: builds and pushes the container
-          run: cd ./build && sh ./build.sh --target win64 --token $GH_TOKEN
+
+        - name: builds and push binaries
+          shell: powershell
+          run: ./build.ps1 --token $GH_TOKEN
           env:
             GH_TOKEN: ${{ secrets.GH_TOKEN }}
