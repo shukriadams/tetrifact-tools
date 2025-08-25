@@ -54,6 +54,11 @@ if [ -z "$target" ]; then
     exit 1;
 fi
 
+#  force set/reset src content
+cd ./../src
+npm install
+cd -
+
 if [ "$target" = "linux64" ]; then
     filename=./linux64/tetrifact-tools
     name="tetrifact-tools_linux64"
