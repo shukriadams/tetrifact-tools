@@ -21,7 +21,7 @@ module.exports = async(host, store, pkg, ticket, force = false)=>{
             await fs.ensureDir(store)
         
     } catch (ex) {
-        console.log(`Failed creating directory at ${store}:${ex}`)
+        log.error(`Failed creating directory at ${store}:${ex}`)
         process.exitCode = 1
         return
     }
@@ -31,9 +31,9 @@ module.exports = async(host, store, pkg, ticket, force = false)=>{
     // can be created but still be in an error state. Use the post-unpack flag instead
     if (await fs.exists(extractedFlag)){
         if (force){
-            console.log(`Package ${pkg} already exists locally, proceeding with forced download.`)
+            log.info(`Package ${pkg} already exists locally, proceeding with forced download.`)
         } else {
-            console.log(`Package ${pkg} already exists locally, skipping download.`)
+            log.info(`Package ${pkg} already exists locally, skipping download.`)
             return extractPath
         }
     }
@@ -44,7 +44,7 @@ module.exports = async(host, store, pkg, ticket, force = false)=>{
         status = await httputils.downloadJSON(statusUrl)
     } catch(ex){
         if (ex.statusCode && ex.statusCode === 404){
-            console.log(`package ${pkg} does not exist`)
+            log.error(`package ${pkg} does not exist`)
         } else {
             log.error(ex)
         }
@@ -54,7 +54,7 @@ module.exports = async(host, store, pkg, ticket, force = false)=>{
     }
 
     if (status.success.status.state != 'Processed_ArchiveAvailable'){
-        console.log(`package ${pkg} could not be downloaded, status is "${status.success.status.state}"`)
+        log.error(`package ${pkg} could not be downloaded, status is "${status.success.status.state}"`)
         process.exitCode = 1
         return
     }
@@ -78,7 +78,7 @@ module.exports = async(host, store, pkg, ticket, force = false)=>{
             }
 
         ticket = ticketInfo.success.ticket
-        console.log(`Dynamically generated ticket ${ticket}`)
+        log.info(`Dynamically generated ticket ${ticket}`)
 
     } catch (ex) {
         log.error(ex)
@@ -94,7 +94,7 @@ module.exports = async(host, store, pkg, ticket, force = false)=>{
     }
 
     try {
-        console.log(`Downloading from ${getUrl}`)
+        log.info(`Downloading from ${getUrl}`)
         let lastPercent = 0
         await httputils.downloadFile(getUrl, savePath, (progress, total)=>{
             let percent = Math.round((progress / total ) * 100, 0)
@@ -117,16 +117,15 @@ module.exports = async(host, store, pkg, ticket, force = false)=>{
 
     // unzip
     try {
-        console.log(`Uncompressing package`)
         const zip = new StreamZip.async({ file: savePath })
         
         zip.on('entry', entry => {
-            process.stdout.write(`Uncompressing ${entry.name}`)
+            log.info(`Uncompressing ${entry.name}`)
         })
 
         await fs.ensureDir(extractPath)
         const count = await zip.extract(null, extractPath)
-        console.log(`Uncompressed  ${count} files`)
+        log.info(`Uncompressing complete, processed ${count} file(s)`)
     } catch (ex){
         log.error(`failed to unzip to ${savePath} to ${extractPath}:${ex}`)
         process.exitCode = 1

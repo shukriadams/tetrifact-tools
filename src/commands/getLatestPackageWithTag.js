@@ -98,5 +98,5 @@ module.exports = async function(){
             id : packageInfo.id
         })
 
-    console.log(`Package ${packageInfo.success.package.id} available at path ${extractPath}`)
+    log.info(`Package ${packageInfo.success.package.id} available at path ${extractPath}`)
 }

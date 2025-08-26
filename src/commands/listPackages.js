@@ -21,7 +21,7 @@ module.exports = async () =>{
         response = await httputils.downloadJSON(url)
     
     if (!response.success || !response.success.packages){
-        console.log(`unexpected json response from server: ${response}`)
+        log.error(`unexpected json response from server: ${response}`)
         return
     }
     
