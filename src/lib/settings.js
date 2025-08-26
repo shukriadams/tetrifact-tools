@@ -19,6 +19,12 @@ let fs = require('fs-extra'),
         // optional. Ticket to use when downloading from server.
         downloadTicket : '',
 
+        // static ticket to use 
+        ticket: null,
+
+        // string to pass to tetrifact when requesting a download ticket
+        ticketAgent: 'tetrifact-tools',
+
         // can be error|warn|info|debug in order of increasing spamminess.
         logLevel: 'warn'
     }

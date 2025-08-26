@@ -25,7 +25,7 @@ class GetHandler(SimpleHTTPRequestHandler):
         elif self.path.startswith('/v1/archives/'):
             self.return_archive()
         elif self.path.startswith('/v1/packages/'):
-            self.return_package()            
+            self.return_package()           
         else:
             self.default_get()
 
@@ -60,20 +60,18 @@ class GetHandler(SimpleHTTPRequestHandler):
         self.wfile.write(str.encode(html))
 
 
-
     def ticket_create(self):
         response = {}
         allowTicket = True
-        state = ''
+        state = '' # can be full|notneeded|default
 
-        if state == '':
+        if state == 'not_needed':
             success = {}
-            clientIdentifier = self.path.split("tickets/",1)[1] 
-            success['ticket'] = 'somet-ticket-guid'
-            success['clientIdentifier'] = clientIdentifier
             success['required'] = True
+            success['ticket'] = ''
+            success['message'] = 'Ticket not required'
             response['success'] = success
-            print(f'ticket generated : {response}')
+            print(f'ticket not needed')
         elif state == 'full':
             error = {}
             error['code'] = 1
@@ -82,11 +80,12 @@ class GetHandler(SimpleHTTPRequestHandler):
             print(f'ticket rejected')
         else:
             success = {}
+            clientIdentifier = self.path.split("tickets/",1)[1] 
+            success['ticket'] = 'somet-ticket-guid'
+            success['clientIdentifier'] = clientIdentifier
             success['required'] = True
-            success['ticket'] = ''
-            success['message'] = 'Ticket not required'
             response['success'] = success
-            print(f'ticket not needed')
+            print(f'ticket generated : {response}')
 
         self.return_json(json.dumps(response), 200)
 
@@ -242,12 +241,12 @@ if not os.path.isfile('./v1/packages.json'):
         archiveStatus = {}
         archiveStatus['success'] = {}
         archiveStatus['success']['status'] = {}
-        archiveStatus['success']['status']['PackageId'] = packageId
-        archiveStatus['success']['status']['QueueUtc'] = str(datetime.today())
-        archiveStatus['success']['status']['StartedUtc '] = str(datetime.today())
-        archiveStatus['success']['status']['State'] = choice(archive_status)
-        archiveStatus['success']['status']['PercentProgress'] = 0
-        archiveStatus['success']['status']['ProjectedSize'] = 0
+        archiveStatus['success']['status']['packageId'] = packageId
+        archiveStatus['success']['status']['queueUtc'] = str(datetime.today())
+        archiveStatus['success']['status']['startedUtc '] = str(datetime.today())
+        archiveStatus['success']['status']['state'] = choice(archive_status)
+        archiveStatus['success']['status']['percentProgress'] = 0
+        archiveStatus['success']['status']['projectedSize'] = 0
 
         with open(f'./v1/packages/{packageId}_archive_status.json', 'w') as out_file:
             out_file.write(json.dumps(archiveStatus, indent=4))
