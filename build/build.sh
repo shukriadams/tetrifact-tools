@@ -35,7 +35,7 @@ while [ $# -gt 0 ]; do
     shift
 done
 
-repo="shukriadams/tetrifact-tool"
+repo="shukriadams/tetrifact-tools"
 
 # get tag on this revision
 tag=$(git describe --abbrev=0 --tags)
