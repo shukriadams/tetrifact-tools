@@ -50,8 +50,8 @@ fi
 echo "{ \"version\" : \"$tag\" }" > ./../src/version.json
 
 if [ -z "$target" ]; then
-    echo "ERROR1 : --target not set. Can be linux64|win64|dev. (dev forces linux64 and uses pkg in /src/node_modules)"
-    exit 1;
+    echo "ERROR1 : --target not set, forcing to 'linux64'. Can be linux64|win64|dev. (dev forces linux64 and uses pkg in /src/node_modules)"
+    target="linux64"
 fi
 
 #  force set/reset src content
