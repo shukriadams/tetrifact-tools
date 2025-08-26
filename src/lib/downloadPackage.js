@@ -119,9 +119,15 @@ module.exports = async(host, store, pkg, ticket, force = false)=>{
     try {
         console.log(`Uncompressing package`)
         const zip = new StreamZip.async({ file: savePath })
+        
+        zip.on('entry', entry => {
+            // fix line length formating issues
+            //process.stdout.write(`Uncompressing ${entry.name}\r`)
+        })
+
         await fs.ensureDir(extractPath)
         const count = await zip.extract(null, extractPath)
-        console.log(`extracted ${count} files`)
+        console.log(`Uncompressed  ${count} files`)
     } catch (ex){
         log.error(`failed to unzip to ${savePath} to ${extractPath}:${ex}`)
         process.exitCode = 1
