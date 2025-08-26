@@ -1,5 +1,8 @@
 let fs = require('fs-extra'),
     yaml = require('js-yaml'),
+    process = require('process'), 
+    minimist = require('minimist'),
+    path = require('path'),
     settings = {
         
         // url to tetrifact server, egs https://tetrifact.example.com
@@ -29,12 +32,31 @@ let fs = require('fs-extra'),
         logLevel: 'warn'
     }
 
- // Load settings from YML file, merge with default settings
-if (fs.existsSync('./.tetrifact.yml')){
-    let userSettings = null
 
+// set default settings path. If running in compiled form it will be in same dir as executable, 
+// else it will be in cwd (in uncompiled form)
+let settingsFilePath = path.join(path.dirname(process.execPath), '.tetrifact.yml')
+
+if (!fs.existsSync(settingsFilePath)){
+    settingsFilePath = path.join(process.cwd(), '.tetrifact.yml')
+}
+
+
+let args = minimist(process.argv.slice(2))
+
+// user can set settings file path with --settings, else look for file in same dir as this exe
+if (args['settings']){
+    if (fs.existsSync(args['settings']))
+        settingsFilePath = args['settings']
+    else
+        console.log(`Settings path ${args['settings']} does not exist, ignoring`)
+}
+
+ // Load settings from YML file, merge with default settings
+if (fs.existsSync(settingsFilePath)){
+    let userSettings = null
     try {
-        const settingsYML = fs.readFileSync('./.tetrifact.yml', 'utf8')
+        const settingsYML = fs.readFileSync(settingsFilePath, 'utf8')
         userSettings = yaml.safeLoad(settingsYML)
         console.log(`.tetrifact.yml found and loaded`)
 
