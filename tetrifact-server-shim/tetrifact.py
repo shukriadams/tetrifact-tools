@@ -195,6 +195,8 @@ if not os.path.isfile('./v1/packages.json'):
                 file_stream.write(item['content'])
 
         shutil.make_archive('./v1/packages/.package_content', 'zip', './v1/packages/.package_content')
+    else:
+        print('WARNING : package_template not found, will not generate archives for packages')
 
     archive_status = ['Queued', 'ArchiveGenerating', 'Processed_PackageNotFound', 'Processed_ArchiveAvailable', 'Processed_ArchiveNotGenerated']
     packages = {}
