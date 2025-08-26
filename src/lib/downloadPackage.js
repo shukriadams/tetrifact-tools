@@ -121,8 +121,7 @@ module.exports = async(host, store, pkg, ticket, force = false)=>{
         const zip = new StreamZip.async({ file: savePath })
         
         zip.on('entry', entry => {
-            // fix line length formating issues
-            //process.stdout.write(`Uncompressing ${entry.name}\r`)
+            process.stdout.write(`Uncompressing ${entry.name}`)
         })
 
         await fs.ensureDir(extractPath)
