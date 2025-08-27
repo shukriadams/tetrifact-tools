@@ -37,16 +37,16 @@ module.exports = async(store)=>{
             0
     })
 
-    console.log(`autopurge found ${downloadedPackages.length} local packages, maximum allowed is ${settings.keep}`)
+    log.info(`autopurge found ${downloadedPackages.length} local packages, maximum allowed is ${settings.keep}`)
 
     if (downloadedPackages.length > settings.keep){
         downloadedPackages = downloadedPackages.map(r => r.package).slice(0, downloadedPackages.length - settings.keep)
 
         for (const downloadedPackage of downloadedPackages){
             await fs.remove(path.join(store, downloadedPackage))
-            console.log(`automatically removed package ${path.join(store, downloadedPackage)}`)
+            log.info(`automatically removed package ${path.join(store, downloadedPackage)}`)
             await fs.remove(path.join(store, downloadedPackage.substr(1)))
-            console.log(`autopurge deleted package ${downloadedPackage}`)
+            log.info(`autopurge deleted package ${downloadedPackage}`)
         }
     }
 }

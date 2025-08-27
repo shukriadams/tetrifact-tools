@@ -89,14 +89,14 @@ module.exports = async()=>{
             await fsUtils.zipDir(sourcePath, archivePath)
         }
 
-        console.log('uploading zip')
+        log.info('uploading zip')
         const result = await uploadHelper.upload(url, archivePath)
         if (!result.success){
             return log.error(`Upload error`, result)
         }
 
         if (result.success.hash === packageHashes){
-            console.log(`SUCCESS - package ${result.success.id} uploaded`)
+            log.info(`SUCCESS - package ${result.success.id} uploaded`)
             await fs.remove(archivePath)
         }
         else
