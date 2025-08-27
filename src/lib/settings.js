@@ -25,8 +25,19 @@ let fs = require('fs-extra'),
         // string to pass to tetrifact when requesting a download ticket
         ticketAgent: 'tetrifact-tools',
 
-        // can be error|warn|info|debug in order of increasing spamminess.
-        logLevel: 'warn'
+        // can be error|warn|info|debug in order of increasing spamminess. 
+        // Cannot be set from command line, must be statically defined
+        logLevel: 'info',
+
+        // wait for builds that are still being compressed
+        wait : false,
+
+        // seconds
+        waitTime: 20,
+        
+        // In seconds. 10 minutes default
+        waitTimeout : 600
+
     }
 
  // Load settings from YML file, merge with default settings
@@ -51,7 +62,17 @@ for (const property in settings)
 
 // ensure bool
 try {
+    settings.wait = settings.wait === true || settings.wait.toLowerCase() === 'true' || settings.wait === 1 ? true : false
+
+} catch{
+    // ignore user-forced error
+    settings.wait = false
+}
+
+// ensure bool
+try {
     settings.purge = settings.purge === true || settings.purge.toLowerCase() === 'true' || settings.purge === 1 ? true : false
+
 } catch{
     // ignore user-forced error
     settings.purge = false
@@ -59,10 +80,26 @@ try {
 
 // ensure int
 try {
+    settings.waitTimeout = parseInt(settings.waitTimeout.toString())
+}catch{
+    // ignore user-forced error
+    settings.waitTimeout = 600
+}
+
+// ensure int
+try {
     settings.keep = parseInt(settings.keep.toString())
-} catch{
+}catch{
     // ignore user-forced error
     settings.keep = 2
+}
+
+// ensure int
+try {
+    settings.waitTime = parseInt(settings.waitTime.toString())
+} catch{
+    // ignore user-forced error
+    settings.waitTime = 20
 }
 
 // ensure keep at least 1 or the package currently downloaded will be purged

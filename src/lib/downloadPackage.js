@@ -3,10 +3,11 @@ const urljoin = require('urljoin'),
     path = require('path'),
     log = require('./log'),
     process = require('process'),
+    timebelt = require('timebelt'),
     httputils = require('madscience-httputils'),
     StreamZip = require('node-stream-zip')
 
-module.exports = async(host, store, pkg, ticket, force = false)=>{
+module.exports = async(host, store, pkg, ticket, wait = false, force = false)=>{
 
     // ensure package is string, url join fail on ints
     const statusUrl = urljoin(host, 'v1/archives/', pkg, 'status'),
@@ -38,26 +39,48 @@ module.exports = async(host, store, pkg, ticket, force = false)=>{
         }
     }
 
-    // ensure package exists
-    let status
-    try{
-        status = await httputils.downloadJSON(statusUrl)
-    } catch(ex){
-        if (ex.statusCode && ex.statusCode === 404){
-            console.log(`package ${pkg} does not exist`)
-        } else {
-            log.error(ex)
+    const start = new Date()
+    
+    while(true){
+
+        // ensure package exists
+        let status
+        
+        try {
+            status = await httputils.downloadJSON(statusUrl)
+        }catch(ex){
+            if (ex.statusCode && ex.statusCode === 404){
+                log.error(`package ${pkg} does not exist`)
+            } else {
+                log.error(ex)
+            }
+
+            process.exitCode = 1
+            return
         }
 
-        process.exitCode = 1
-        return
+        if (wait && (status.success.status.state == 'Queued' || status.success.status.state == 'ArchiveGenerating')){
+            const elapsedSeconds = timebelt.secondsDifference(Date.now(), start)
+            if (elapsedSeconds > settings.waitTimeout){
+                log.error(`Timed out (${settings.waitTimeout} seconds) waiting for package ${pkg} to become available, last status is "${status.success.status.state}".`)
+                process.exitCode = 1
+                return
+            }
+
+            log.info(`Waiting ${settings.waitTime} seconds for package ${pkg}, status is "${status.success.status.state}"`)
+            await timebelt.pause(settings.waitTime * 1000)
+            continue
+        }
+
+        if (status.success.status.state != 'Processed_ArchiveAvailable'){
+            console.log(`package ${pkg} could not be downloaded, status is "${status.success.status.state}"`)
+            process.exitCode = 1
+            return
+        } 
+
+        break
     }
 
-    if (status.success.status.state != 'Processed_ArchiveAvailable'){
-        console.log(`package ${pkg} could not be downloaded, status is "${status.success.status.state}"`)
-        process.exitCode = 1
-        return
-    }
 
     // if no ticket passed in from settings, try to get one from server
     let ticketRequestUrl =  urljoin(host, 'v1/tickets/', settings.ticketAgent),
