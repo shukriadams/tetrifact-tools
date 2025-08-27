@@ -39,13 +39,11 @@ module.exports = async(host, store, pkg, ticket, wait = false, force = false)=>{
         }
     }
 
-    const start = new Date()
+    let start = new Date(),
+        status
     
     while(true){
 
-        // ensure package exists
-        let status
-        
         try {
             status = await httputils.downloadJSON(statusUrl)
         }catch(ex){
@@ -111,11 +109,6 @@ module.exports = async(host, store, pkg, ticket, wait = false, force = false)=>{
     }
 
     const getUrl = urljoin(host, 'v1/archives/', `${pkg}?ticket=${ticket}`)
-    if (!status.success){
-        log.error(`error response from ${getUrl}: ${status}`)
-        process.exitCode = 1
-        return 
-    }
 
     try {
         log.info(`Downloading from ${getUrl}`)
