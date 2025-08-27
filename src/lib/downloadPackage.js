@@ -109,12 +109,6 @@ module.exports = async(host, store, pkg, ticket, force = false)=>{
         return 
     }
 
-    // check if the downloaded file is empty, this is often caused by specifying the wrong protocol
-    const stats = fs.statSync(savePath)
-    
-    if (!stats.size)
-        log.warn(`the package from ${getUrl} is empty. This can often happen when the wrong host protocol (http/https) is used.`)
-
     // unzip
     try {
         console.log(`Uncompressing package`)
