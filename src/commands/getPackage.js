@@ -43,6 +43,9 @@ module.exports = async function(){
     // if extractPath is null package download failed, do nothing, else purge + report path
     if (extractPath){
         await purgePackages(store)
+        // always log this to console, it _must_ go to stdout no matter what log level
+        console.log(`Package ${pkg} available at path ${extractPath}`)
+        
         log.info(`Package ${pkg} available at path ${extractPath}`)
     }  
 }
