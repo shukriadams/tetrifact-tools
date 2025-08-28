@@ -137,13 +137,13 @@ module.exports = async(host, store, pkg, ticket, wait = false, force = false)=>{
         await fs.ensureDir(extractPath)
         const count = await zip.extract(null, extractPath)
         log.info(`Uncompressing complete, processed ${count} file(s)`)
+        await fs.remove(savePath)
+
     } catch (ex){
         log.error(`failed to unzip to ${savePath} to ${extractPath}:${ex}`)
         process.exitCode = 1
         return
     }
-
-    await fs.remove(savePath)
 
     // write done flag
     await fs.writeJson(extractedFlag, { created : new Date().getTime() })

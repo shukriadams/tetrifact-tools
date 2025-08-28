@@ -40,6 +40,7 @@ module.exports = async function(){
     }
 
     const extractPath = await downloadPackage(host, store, pkg.toString(), ticket,  wait, force)
+    
     // if extractPath is null package download failed, do nothing, else purge + report path
     if (extractPath){
         await purgePackages(store)

@@ -1,4 +1,4 @@
-# single-file shim server for Tetrifact for Python3
+# single-file shim server for Tetrifact for Python 3.8
 
 from http.server import BaseHTTPRequestHandler, HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
